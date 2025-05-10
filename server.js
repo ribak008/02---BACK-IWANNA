@@ -2,10 +2,7 @@
 const express = require('express');
 const app = express();
 const port = 3000; // Puerto en el que estará corriendo tu API
-
-// Middleware para manejar JSON
-app.use(express.json());
-
+const { select } = require('./models/consultas');
 // Ruta de ejemplo
 app.get('/', (req, res) => {
   res.send('¡Hola desde la API!');
@@ -16,10 +13,13 @@ app.listen(port, () => {
   console.log(`Servidor API corriendo en http://localhost:${port}`);
 });
 
-app.get('/usuarios', (req, res) => {
-  const usuarios = [
-    { id: 1, nombre: 'Juan' },
-    { id: 2, nombre: 'Ana' },
-  ];
-  res.json(usuarios);  // Responde con un JSON de usuarios
+app.get('/usuarios', async (req, res) => {
+  try {
+    const sql_usuarios = "SELECT u.nombre FROM usuario u" 
+    const usuarios = await select(sql_usuarios);
+    res.json(usuarios);
+  } catch (err) {
+    console.error('Error al consultar usuarios:', err);
+    res.status(500).json({ error: 'Error al obtener usuarios' });
+  }
 });
