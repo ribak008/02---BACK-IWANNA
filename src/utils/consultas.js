@@ -1,4 +1,4 @@
-const conexion = require('../db');
+const conexion = require('../config/db');
 
 function select(sql, params = []) {
     return new Promise((resolve, reject) => {
