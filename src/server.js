@@ -7,7 +7,7 @@ const app = express();
 app.use(express.json());
 
 //RUTAS
-app.use('/api', usuarioRutas);
+app.use('/usuarios', usuarioRutas);
 
 //INICIA LA API
 const PORT = process.env.PORT || 3000;

@@ -3,6 +3,8 @@ const router = express.Router();
 
 const usuarioController = require('../controllers/userController')
 
-router.get('/usuarios', usuarioController.getUsuarios);
+//RUTAS
+router.get('/', usuarioController.getUsuarios);
+router.get('/:email', usuarioController.getUsuarioPorEmail);
 
 module.exports = router;
