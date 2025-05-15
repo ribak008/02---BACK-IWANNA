@@ -13,6 +13,9 @@ router.post('/create-customer',PaymentController.postCustomer);
 // Endpoint para obtener productos
 router.get('/products',PaymentController.getProducts );
 
+// Endpoint para obtener producto por ID
+router.get('/products/:customerId',PaymentController.getProductsById );
+
 // Endpoint para obtener precios
 router.get('/prices',PaymentController.getPrices);
 
