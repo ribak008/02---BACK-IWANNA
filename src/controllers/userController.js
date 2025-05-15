@@ -15,8 +15,22 @@ const getUsuarioPorEmail = async (req, res) => {
     const email = req.params.email;
     try {
         const sql = `-- sql Usuario por email
-                    SELECT * 
+                    SELECT u.id,
+                        u.nombre,
+                        u.email,
+                        u.telefono,
+                        u.rut,
+                        u.edad,
+                        u.id_sexo,
+                        u.descripcion,
+                        u.id_profesion,
+                        u.id_estado,
+                        u.id_tipo,
+                        u.foto,
+                        CONCAT(c.descripcion,' ',r.descripcion) as 'direccion'
                     FROM usuario u
+                    JOIN comuna c ON c.id = u.id_comuna
+                    JOIN region r ON r.id = c.id_region
                     WHERE u.email = ?`; 
         const usuario = await select(sql,email);
 
