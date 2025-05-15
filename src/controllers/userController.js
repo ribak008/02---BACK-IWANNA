@@ -11,6 +11,7 @@ const getUsuarios = async (req, res) => {
     }
 };
 
+
 const getUsuarioPorEmail = async (req, res) => {
     const email = req.params.email;
     try {
@@ -45,7 +46,35 @@ const getUsuarioPorEmail = async (req, res) => {
     }
 };
 
+const createUser = async (req, res) => {
+    const { nombre, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id_comuna } = req.body;
+    try {
+        const sql = `INSERT INTO usuario (nombre, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id_comuna) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+        const usuario = await select(sql, [nombre, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id_comuna]);
+        res.json(usuario);
+    } catch (err) {
+        console.error('Error al crear usuario:', err);
+        res.status(500).json({ error: 'Error al crear usuario' });
+    }
+};
+
+const updateUser = async (req, res) => {
+    const { id, nombre, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id_comuna } = req.body;
+    try {
+        const sql = `UPDATE usuario SET nombre = ?, email = ?, telefono = ?, rut = ?, edad = ?, id_sexo = ?, descripcion = ?, id_profesion = ?, id_estado = ?, id_tipo = ?, foto = ?, id_comuna = ? WHERE id = ?`;
+        const usuario = await select(sql, [nombre, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id_comuna, id]);
+        res.json(usuario);
+    } catch (err) {
+        console.error('Error al actualizar usuario:', err);
+        res.status(500).json({ error: 'Error al actualizar usuario' });
+    }
+};
+
+
+
 module.exports = {
     getUsuarios,
-    getUsuarioPorEmail
+    getUsuarioPorEmail,
+    createUser,
+    updateUser
 }
