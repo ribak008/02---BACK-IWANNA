@@ -84,6 +84,46 @@ const getProducts = async (req, res) => {
     }
 };
 
+
+const getProductsById = async (req, res) => {
+    const customerId = req.params.customerId;
+  
+    try {
+        const subscriptions = await stripe.subscriptions.list({
+          customer: customerId,
+          status: 'all', // puedes filtrar por 'active' si solo quieres suscripciones activas
+          expand: ['data.default_payment_method', 'data.items.data.price.product'],
+        });
+    
+        if (subscriptions.data.length === 0) {
+          return res.json({ subscribed: false });
+        }
+    
+        const activeSub = subscriptions.data.find(sub => sub.status === 'active' || sub.status === 'trialing');
+    
+        if (!activeSub) {
+          return res.json({ subscribed: false });
+        }
+    
+        const planName = activeSub.items.data[0].price.product.name;
+        const planPrice = activeSub.items.data[0].price.unit_amount / 100;
+    
+        res.json({
+          subscribed: true,
+          status: activeSub.status,
+          planId: activeSub.items.data[0].price.id,
+          productId: activeSub.items.data[0].price.product.id,
+          planName,
+          price: planPrice,
+          currency: activeSub.items.data[0].price.currency,
+          current_period_end: activeSub.current_period_end, // fecha fin del ciclo
+        });
+      } catch (error) {
+        console.error('Error al obtener la suscripción:', error);
+        res.status(500).json({ error: 'Error al verificar suscripción' });
+      }
+};
+
 const getPrices =  async (req, res) => {
     try {
         const prices = await stripe.prices.list();
@@ -125,5 +165,6 @@ module.exports = {
     postCustomer,
     getProducts,
     getPrices,
-    webhook
+    webhook,
+    getProductsById
 }
