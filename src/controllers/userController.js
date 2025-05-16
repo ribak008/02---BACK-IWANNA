@@ -27,13 +27,12 @@ const getUsuarioPorEmail = async (req, res) => {
                         u.id_estado,
                         u.id_tipo,
                         u.foto,
-                        CONCAT(c.descripcion,' ',r.descripcion) as 'direccion'
+                        d.descripcion as "direccion"
                     FROM usuario u
-                    JOIN comuna c ON c.id = u.id_comuna
-                    JOIN region r ON r.id = c.id_region
+                    JOIN direccion_usuario d ON d.id = u.id
                     WHERE u.email = ?`; 
         const usuario = await select(sql,email);
-
+        console.log(usuario);
         if (usuario.length === 0) {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
