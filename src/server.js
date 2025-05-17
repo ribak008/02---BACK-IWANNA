@@ -1,6 +1,3 @@
-
-
-
 const express = require('express');
 const usuarioRutas = require('./routes/usuariosRoutes')
 const paymentStripe = require('./routes/paymentStripe')

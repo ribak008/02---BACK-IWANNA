@@ -1,16 +1,5 @@
 const { select } = require('../utils/consultas');
 
-const getUsuarios = async (req, res) => {
-    try {
-        const sql_usuarios = "SELECT * FROM usuario" 
-        const usuarios = await select(sql_usuarios);
-        res.json(usuarios);
-    } catch (err) {
-        console.error('Error al consultar usuarios:', err);
-        res.status(500).json({ error: 'Error al obtener usuarios' });
-    }
-};
-
 
 const getUsuarioPorEmail = async (req, res) => {
     const email = req.params.email;
@@ -24,6 +13,7 @@ const getUsuarioPorEmail = async (req, res) => {
                         u.edad,
                         u.id_sexo,
                         u.descripcion,
+                        p.descripcion as "profesion",
                         u.id_profesion,
                         u.id_estado,
                         u.id_tipo,
@@ -31,6 +21,7 @@ const getUsuarioPorEmail = async (req, res) => {
                         d.descripcion as "direccion"
                     FROM usuario u
                     JOIN direccion_usuario d ON d.id = u.id
+                    LEFT JOIN profesion p ON p.id = u.id_profesion
                     WHERE u.email = ?`; 
         const usuario = await select(sql,email);
         console.log(usuario);
@@ -58,10 +49,27 @@ const createUser = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-    const { id, nombre, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id_comuna } = req.body;
+    const { id, nombre, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id_direccion } = req.body;
     try {
-        const sql = `UPDATE usuario SET nombre = ?, email = ?, telefono = ?, rut = ?, edad = ?, id_sexo = ?, descripcion = ?, id_profesion = ?, id_estado = ?, id_tipo = ?, foto = ?, id_comuna = ? WHERE id = ?`;
-        const usuario = await select(sql, [nombre, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id_comuna, id]);
+        const sql = `-- sql Actualiza usuario
+                    UPDATE 
+                        usuario 
+                    SET 
+                        nombre = ?, 
+                        email = ?, 
+                        telefono = ?, 
+                        rut = ?, 
+                        edad = ?, 
+                        id_sexo = ?, 
+                        descripcion = ?, 
+                        id_profesion = ?, 
+                        id_estado = ?, 
+                        id_tipo = ?, 
+                        foto = ?, 
+                        id_direccion = ? 
+                    WHERE 
+                        id = ?`;
+        const usuario = await select(sql, [nombre, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id_direccion, id]);
         res.json(usuario);
     } catch (err) {
         console.error('Error al actualizar usuario:', err);
@@ -72,7 +80,6 @@ const updateUser = async (req, res) => {
 
 
 module.exports = {
-    getUsuarios,
     getUsuarioPorEmail,
     createUser,
     updateUser
