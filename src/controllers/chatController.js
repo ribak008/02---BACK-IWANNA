@@ -86,7 +86,7 @@ const getMensajes = async (req, res) => {
         WHERE ch.id = ?
         order by mj.id;`;
         const chat = await select(sql, [id]);
-        console.log(chat);
+        //console.log(chat);
         if (chat.length === 0) {
             return res.status(404).json({ message: 'mensajes no encontrados' });
         }
