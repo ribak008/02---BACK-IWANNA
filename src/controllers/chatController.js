@@ -76,15 +76,17 @@ const getMensajes = async (req, res) => {
         mj.id_autor,
         mj.id_chat,
         mj.contenido,
-        DATE_FORMAT(mj.f_creacion, '%d/%m/%Y') AS f_creacion,
+        DATE_FORMAT(mj.f_creacion, '%H:%i') AS f_creacion,
         u.nombre,
         u.foto
           
         FROM mensaje_chat mj
         JOIN usuario u ON mj.id_autor = u.id
         JOIN chat ch ON ch.id = mj.id_chat
-        WHERE ch.id = ?;`;
+        WHERE ch.id = ?
+        order by mj.id;`;
         const chat = await select(sql, [id]);
+        console.log(chat);
         if (chat.length === 0) {
             return res.status(404).json({ message: 'mensajes no encontrados' });
         }
@@ -100,7 +102,7 @@ const getMensajes = async (req, res) => {
 const postMensaje = async (req, res) => {
     const { id_chat, id_autor, contenido } = req.body;
     try {
-        const sql = `INSERT INTO mensaje (id_chat, id_autor, contenido) VALUES (?, ?, ?)`;
+        const sql = `INSERT INTO mensaje_chat (id_chat, id_autor, contenido, f_creacion) VALUES (?, ?, ?, NOW())`;
         const mensaje = await select(sql, [id_chat, id_autor, contenido]);
         res.json(mensaje);
     } catch (err) {

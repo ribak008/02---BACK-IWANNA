@@ -5,7 +5,6 @@ const getCategory = async (req, res) => {
     try {
         const sql_category = "SELECT * FROM area_profesion;" 
         const categorias = await select(sql_category);
-        console.log(categorias);
         res.json(categorias);
     } catch (err) {
         console.error('Error al consultar categorias:', err);
@@ -13,6 +12,7 @@ const getCategory = async (req, res) => {
     }
 };
 
+
 module.exports = {
-    getCategory
+    getCategory,
 }
