@@ -4,6 +4,8 @@ const paymentStripe = require('./routes/paymentStripe')
 const categoryRoutes = require('./routes/categoryRoutes')
 const postRoutes = require('./routes/postRoutes')
 const chatRoutes = require('./routes/chatRoutes')
+const direccionRoutes = require('./routes/direccionRoutes')
+
 
 
 
@@ -17,6 +19,8 @@ app.use('/payment', paymentStripe);
 app.use('/category', categoryRoutes);
 app.use('/post', postRoutes);
 app.use('/chat', chatRoutes);
+app.use('/direccion', direccionRoutes);
+
 
 //INICIA LA API
 const PORT = process.env.PORT || 3000;

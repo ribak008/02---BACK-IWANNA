@@ -16,14 +16,14 @@ const getChatById = async (req, res) => {
     const id = req.params.id;
     try {
     
-   const sql = 
+    const sql = 
         `SELECT  
         ch.id_usuario,
         ch.id_chat,
         ch.id_estado,
         u.nombre,
         u.foto
-          
+        
         FROM chat ch
         JOIN usuario u ON ch.id_usuario = u.id_usuario 
         WHERE ch.id_usuario = ? AND ch.id_estado = 4;`;
@@ -67,7 +67,7 @@ const getMensajes = async (req, res) => {
 };
 
 module.exports = {
-    getChat,
+    getChats,
     getChatById,
     getMensajes
 }
