@@ -89,11 +89,39 @@ const updateUser = async (req, res) => {
     }
 };
 
+const getUsuarioPorEmailPrueba = async (req, res) => {
+    const email = req.params.email;
+    try {
+        const sql = `SELECT 
+                        nombre,
+                        apellido,
+                        email,
+                        telefono,
+                        rut,
+                        id_sexo,
+                        id_estado,
+                        id_tipo,
+                        edad
+                    FROM usuario 
+                    WHERE email = ?`; 
+        const usuario = await select(sql, email);
+        console.log('Usuario encontrado:', usuario); // Log para debugging
+        
+        if (usuario.length === 0) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
 
+        res.json(usuario[0]);
+    } catch (err) {
+        console.error('Error al consultar usuario:', err);
+        res.status(500).json({ error: 'Error al obtener usuario' });
+    }
+};
 
 module.exports = {
     getUsuarioPorEmail,
     createUser,
     updateUser,
-    createUserPrueba
+    createUserPrueba,
+    getUsuarioPorEmailPrueba
 }
