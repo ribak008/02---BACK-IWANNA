@@ -48,6 +48,18 @@ const createUser = async (req, res) => {
     }
 };
 
+const createUserPrueba = async (req, res) => {
+    const {nombre,apellido,email,telefono,rut,id_sexo,id_estado,id_tipo,edad} = req.body;
+    try {
+        const sql = `insert into usuario (nombre,apellido,email,telefono,rut,id_sexo,id_estado,id_tipo,edad) values (?,?,?,?,?,?,?,?,?);`;
+        const usuario = await select(sql,[nombre,apellido,email,telefono,rut,id_sexo,id_estado,id_tipo,edad]);
+        res.json(usuario);
+    } catch (err) {
+        console.error('Error al crear usuario desde userprueba:', err);
+        res.status(500).json({ error: 'Error al crear usuario' });
+    }
+}
+
 const updateUser = async (req, res) => {
     const { id, nombre, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id_direccion } = req.body;
     try {
@@ -82,5 +94,6 @@ const updateUser = async (req, res) => {
 module.exports = {
     getUsuarioPorEmail,
     createUser,
-    updateUser
+    updateUser,
+    createUserPrueba
 }
