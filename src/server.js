@@ -5,6 +5,7 @@ const categoryRoutes = require('./routes/categoryRoutes')
 const postRoutes = require('./routes/postRoutes')
 const chatRoutes = require('./routes/chatRoutes')
 const direccionRoutes = require('./routes/direccionRoutes')
+const s3Routes = require('./routes/s3/s3Routes')
 
 
 
@@ -20,7 +21,7 @@ app.use('/category', categoryRoutes);
 app.use('/post', postRoutes);
 app.use('/chat', chatRoutes);
 app.use('/direccion', direccionRoutes);
-
+app.use("/s3", s3Routes);
 
 //INICIA LA API
 const PORT = process.env.PORT || 3000;
