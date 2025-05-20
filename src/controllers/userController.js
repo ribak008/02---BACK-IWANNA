@@ -81,8 +81,12 @@ const updateUser = async (req, res) => {
                         id_direccion = ? 
                     WHERE 
                         id = ?`;
-        const usuario = await select(sql, [nombre, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id_direccion, id]);
-        res.json(usuario);
+        const resultado = await select(sql, [nombre, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id_direccion, id]);
+        
+        if (!resultado) {
+            return res.status(500).json({ exito: false});
+        }
+        res.json({exito: true});
     } catch (err) {
         console.error('Error al actualizar usuario:', err);
         res.status(500).json({ error: 'Error al actualizar usuario' });
