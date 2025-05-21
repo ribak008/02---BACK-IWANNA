@@ -5,7 +5,7 @@ const categoryRoutes = require('./routes/categoryRoutes')
 const postRoutes = require('./routes/postRoutes')
 const chatRoutes = require('./routes/chatRoutes')
 const direccionRoutes = require('./routes/direccionRoutes')
-
+const favoritosRoutes = require('./routes/favoritosRoutes')
 
 
 
@@ -20,6 +20,7 @@ app.use('/category', categoryRoutes);
 app.use('/post', postRoutes);
 app.use('/chat', chatRoutes);
 app.use('/direccion', direccionRoutes);
+app.use('/favoritos', favoritosRoutes)
 
 
 //INICIA LA API
