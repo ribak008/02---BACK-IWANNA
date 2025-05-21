@@ -22,13 +22,13 @@ const insertDireccion = async (req, res) => {
         const respuesta = await select(sql,[id,descripcion,latitud,longitud]);
         
         if (respuesta?.affectedRows > 0) {
-            return res.json({ mensaje: 'Dirección guardada correctamente' });
+            res.json({ exito: true });
         } else {
-            return res.status(200).json({ mensaje: 'No se realizaron cambios' });
+            res.json({ exito: true});
         }
     } catch (err) {
         console.error('Error al consultar usuarios:', err);
-        res.status(500).json({ error: 'Error al obtener usuarios' });
+        res.status(500).json({ exito: false });
     }
 };
 

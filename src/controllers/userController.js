@@ -48,6 +48,18 @@ const createUser = async (req, res) => {
     }
 };
 
+const createUserPrueba = async (req, res) => {
+    const {nombre,apellido,email,telefono,rut,id_sexo,id_estado,id_tipo,edad} = req.body;
+    try {
+        const sql = `insert into usuario (nombre,apellido,email,telefono,rut,id_sexo,id_estado,id_tipo,edad) values (?,?,?,?,?,?,?,?,?);`;
+        const usuario = await select(sql,[nombre,apellido,email,telefono,rut,id_sexo,id_estado,id_tipo,edad]);
+        res.json(usuario);
+    } catch (err) {
+        console.error('Error al crear usuario desde userprueba:', err);
+        res.status(500).json({ error: 'Error al crear usuario' });
+    }
+}
+
 const updateUser = async (req, res) => {
     const { id, nombre, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id_direccion } = req.body;
     try {
@@ -69,18 +81,51 @@ const updateUser = async (req, res) => {
                         id_direccion = ? 
                     WHERE 
                         id = ?`;
-        const usuario = await select(sql, [nombre, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id_direccion, id]);
-        res.json(usuario);
+        const resultado = await select(sql, [nombre, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id_direccion, id]);
+        
+        if (!resultado) {
+            return res.status(500).json({ exito: false});
+        }
+        res.json({exito: true});
     } catch (err) {
         console.error('Error al actualizar usuario:', err);
         res.status(500).json({ error: 'Error al actualizar usuario' });
     }
 };
 
+const getUsuarioPorEmailPrueba = async (req, res) => {
+    const email = req.params.email;
+    try {
+        const sql = `SELECT 
+                        nombre,
+                        apellido,
+                        email,
+                        telefono,
+                        rut,
+                        id_sexo,
+                        id_estado,
+                        id_tipo,
+                        edad
+                    FROM usuario 
+                    WHERE email = ?`; 
+        const usuario = await select(sql, email);
+        console.log('Usuario encontrado:', usuario); // Log para debugging
+        
+        if (usuario.length === 0) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
 
+        res.json(usuario[0]);
+    } catch (err) {
+        console.error('Error al consultar usuario:', err);
+        res.status(500).json({ error: 'Error al obtener usuario' });
+    }
+};
 
 module.exports = {
     getUsuarioPorEmail,
     createUser,
-    updateUser
+    updateUser,
+    createUserPrueba,
+    getUsuarioPorEmailPrueba
 }
