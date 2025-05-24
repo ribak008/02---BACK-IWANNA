@@ -20,7 +20,7 @@ const getUsuarioPorEmail = async (req, res) => {
                         u.foto,
                         d.descripcion as "direccion"
                     FROM usuario u
-                    JOIN direccion_usuario d ON d.id = u.id
+                    LEFT JOIN direccion_usuario d ON d.id = u.id
                     LEFT JOIN profesion p ON p.id = u.id_profesion
                     WHERE u.email = ?`; 
         const usuario = await select(sql,email);
@@ -37,26 +37,57 @@ const getUsuarioPorEmail = async (req, res) => {
 };
 
 const createUser = async (req, res) => {
-    const { nombre, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id_comuna } = req.body;
+    const { nombre, apellido, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id_comuna } = req.body;
+    
     try {
-        const sql = `INSERT INTO usuario (nombre, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id_comuna) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-        const usuario = await select(sql, [nombre, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id_comuna]);
-        res.json(usuario);
+        const sql = `INSERT INTO usuario (nombre, apellido, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id_comuna) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+        
+        // Ejecutar la consulta
+        const result = await select(sql, [nombre, apellido, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id_comuna]);
+        
+        // Enviar respuesta con el ID insertado
+        res.json({
+            success: true,
+            userId: result.insertId, // Asegúrate de que tu función select devuelva el insertId
+            message: 'Usuario creado exitosamente'
+        });
+        
     } catch (err) {
         console.error('Error al crear usuario:', err);
-        res.status(500).json({ error: 'Error al crear usuario' });
+        res.status(500).json({ 
+            success: false,
+            error: 'Error al crear usuario',
+            details: err.message 
+        });
     }
 };
 
 const createUserPrueba = async (req, res) => {
-    const {nombre,apellido,email,telefono,rut,id_sexo,id_estado,id_tipo,edad} = req.body;
+    const { nombre, apellido, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo } = req.body;
+    
     try {
-        const sql = `insert into usuario (nombre,apellido,email,telefono,rut,id_sexo,id_estado,id_tipo,edad) values (?,?,?,?,?,?,?,?,?);`;
-        const usuario = await select(sql,[nombre,apellido,email,telefono,rut,id_sexo,id_estado,id_tipo,edad]);
-        res.json(usuario);
+        // Corregir el número de parámetros (10 valores = 10 ?)
+        const sql = `INSERT INTO usuario (nombre, apellido, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+        
+        // Asegurarse de que la función select devuelva el resultado de la inserción
+        const result = await select(sql, [nombre, apellido, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo]);
+        
+        // Devolver el ID del usuario creado
+        res.json({
+            success: true,
+            userId: result.insertId, // Asegúrate de que tu función select devuelva el insertId
+            message: 'Usuario creado exitosamente'
+        });
+
     } catch (err) {
-        console.error('Error al crear usuario desde userprueba:', err);
-        res.status(500).json({ error: 'Error al crear usuario' });
+        console.error('Error al crear usuario:', err);
+        res.status(500).json({ 
+            success: false,
+            error: 'Error al crear usuario',
+            details: err.message 
+        });
     }
 }
 

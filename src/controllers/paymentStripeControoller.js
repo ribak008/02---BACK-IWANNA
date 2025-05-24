@@ -28,22 +28,39 @@ const PostCheckoutSession = async (req, res) => {
 };
 
 const postCustomer = async (req, res) => {
+    // Validar que vengan los campos requeridos
+    if (!req.body.userId || !req.body.email || !req.body.nombre) {
+        return res.status(400).json({ 
+            success: false,
+            error: 'Faltan campos requeridos: userId, email, nombre' 
+        });
+    }
+
     const { userId, email, nombre } = req.body;
 
     try {
+        console.log('Creando cliente en Stripe con datos:', { email, nombre, userId });
+        
         const customer = await stripe.customers.create({
-        email,
-        name: nombre,
-        metadata: {
-            app_user_id: userId  // aquí ligamos con tu base de datos
-        }
+            email,
+            name: nombre,
+            metadata: { app_user_id: userId }
         });
 
-        // Puedes guardar customer.id en tu base de datos ligada al usuario
-        res.json({ customerId: customer.id });
+        console.log('Cliente creado exitosamente:', customer.id);
+        
+        res.status(200).json({ 
+            success: true,
+            customerId: customer.id 
+        });
+
     } catch (error) {
-        console.error('Error creando cliente:', error);
-        res.status(500).json({ error: 'No se pudo crear el cliente' });
+        console.error('Error creando cliente en Stripe:', error);
+        res.status(500).json({ 
+            success: false,
+            error: 'No se pudo crear el cliente',
+            details: error.message 
+        });
     }
 };
 
