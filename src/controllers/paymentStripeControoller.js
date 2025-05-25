@@ -5,45 +5,103 @@ const PostCheckoutSession = async (req, res) => {
     try {
         const { priceId, customerId } = req.body;
 
-        const session = await stripe.checkout.sessions.create({
-        mode: 'subscription',
-        customer: customerId,
-        payment_method_types: ['card'],
-        line_items: [{
-            price: priceId, 
-            quantity: 1
-        }],
-        success_url: process.env.SUCCESS_URL,
-        cancel_url: process.env.CANCEL_URL,
-        metadata: {
-            platform: 'react-native'
+        // Verificar que el cliente exista
+        let customer;
+        try {
+            customer = await stripe.customers.retrieve(customerId);
+        } catch (error) {
+            console.error('Error al recuperar el cliente:', error);
+            return res.status(400).json({ 
+                error: 'Cliente no encontrado en Stripe',
+                details: error.message 
+            });
         }
+
+        // Verificar si el cliente ya tiene una suscripción activa
+        const subscriptions = await stripe.subscriptions.list({
+            customer: customerId,
+            status: 'all',
+            limit: 1
         });
 
-        res.json({ url: session.url });
+        if (subscriptions.data.length > 0) {
+            const activeSub = subscriptions.data.find(sub => 
+                sub.status === 'active' || sub.status === 'trialing'
+            );
+            
+            if (activeSub) {
+                return res.status(400).json({
+                    error: 'Ya tienes una suscripción activa',
+                    subscriptionId: activeSub.id
+                });
+            }
+        }
+
+        // Crear la sesión de checkout
+        const session = await stripe.checkout.sessions.create({
+            mode: 'subscription',
+            customer: customerId,
+            payment_method_types: ['card'],
+            line_items: [{
+                price: priceId, 
+                quantity: 1
+            }],
+            success_url: process.env.SUCCESS_URL,
+            cancel_url: process.env.CANCEL_URL,
+            metadata: {
+                platform: 'react-native',
+                customer_id: customerId
+            }
+        });
+
+        res.json({ 
+            url: session.url,
+            sessionId: session.id
+        });
+
     } catch (error) {
         console.error('Error al crear sesión de pago:', error);
-        res.status(500).json({ error: 'Error al procesar el pago' });
+        res.status(500).json({ 
+            error: 'Error al procesar el pago',
+            details: error.message 
+        });
     }
 };
 
 const postCustomer = async (req, res) => {
+    // Validar que vengan los campos requeridos
+    if (!req.body.userId || !req.body.email || !req.body.nombre) {
+        return res.status(400).json({ 
+            success: false,
+            error: 'Faltan campos requeridos: userId, email, nombre' 
+        });
+    }
+
     const { userId, email, nombre } = req.body;
 
     try {
+        console.log('Creando cliente en Stripe con datos:', { email, nombre, userId });
+        
         const customer = await stripe.customers.create({
-        email,
-        name: nombre,
-        metadata: {
-            app_user_id: userId  // aquí ligamos con tu base de datos
-        }
+            email,
+            name: nombre,
+            metadata: { app_user_id: userId }
         });
 
-        // Puedes guardar customer.id en tu base de datos ligada al usuario
-        res.json({ customerId: customer.id });
+        console.log('Cliente creado exitosamente:', customer.id);
+        
+        res.status(200).json({ 
+            success: true,
+            customerId: customer.id 
+        });
+
     } catch (error) {
-        console.error('Error creando cliente:', error);
-        res.status(500).json({ error: 'No se pudo crear el cliente' });
+        console.error('Error creando cliente en Stripe:', error);
+        res.status(500).json({ 
+            success: false,
+            error: 'No se pudo crear el cliente',
+            details: error.message 
+        });
     }
 };
 
@@ -85,43 +143,84 @@ const getProducts = async (req, res) => {
 };
 
 
-const getProductsById = async (req, res) => {
-    const customerId = req.params.customerId;
-  
+const getSuscriptionById = async (req, res) => {
+    const appUserId = req.params.customerId;
+
     try {
+        // 1. Buscar el cliente por el app_user_id en los metadatos
+        const customers = await stripe.customers.search({
+            query: `metadata['app_user_id']:'${appUserId}'`,
+            limit: 1
+        });
+
+        if (customers.data.length === 0) {
+            return res.status(404).json({ 
+                subscribed: false, 
+                message: 'No se encontró el cliente' 
+            });
+        }
+
+        const customer = customers.data[0];
+        
+        // 2. Buscar suscripciones
         const subscriptions = await stripe.subscriptions.list({
-          customer: customerId,
-          status: 'all', // puedes filtrar por 'active' si solo quieres suscripciones activas
-          expand: ['data.default_payment_method', 'data.items.data.price.product'],
+            customer: customer.id,
+            status: 'all',
+            limit: 1,
         });
-    
+
         if (subscriptions.data.length === 0) {
-          return res.json({ subscribed: false });
+            return res.json({ 
+                subscribed: false, 
+                customerId: customer.id 
+            });
         }
-    
-        const activeSub = subscriptions.data.find(sub => sub.status === 'active' || sub.status === 'trialing');
-    
-        if (!activeSub) {
-          return res.json({ subscribed: false });
-        }
-    
-        const planName = activeSub.items.data[0].price.product.name;
-        const planPrice = activeSub.items.data[0].price.unit_amount / 100;
-    
-        res.json({
-          subscribed: true,
-          status: activeSub.status,
-          planId: activeSub.items.data[0].price.id,
-          productId: activeSub.items.data[0].price.product.id,
-          planName,
-          price: planPrice,
-          currency: activeSub.items.data[0].price.currency,
-          current_period_end: activeSub.current_period_end, // fecha fin del ciclo
+
+        const subscription = subscriptions.data[0];
+        
+        // 3. Obtener detalles del precio
+        const priceId = subscription.items.data[0].price.id;
+        const price = await stripe.prices.retrieve(priceId, {
+            expand: ['product']
         });
-      } catch (error) {
+
+        // 4. Formatear fecha de vencimiento
+        const expiryDate = new Date(subscription.current_period_end * 1000);
+        const formattedExpiryDate = expiryDate.toLocaleDateString('es-ES', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        // 5. Construir respuesta
+        const response = {
+            subscribed: ['active', 'trialing'].includes(subscription.status),
+            status: subscription.status,
+            planId: price.id,
+            productId: price.product.id,
+            planName: price.product.name,
+            price: price.unit_amount / 100,
+            currency: price.currency,
+            current_period_end: subscription.current_period_end,
+            formattedExpiryDate: formattedExpiryDate,
+            isActive: ['active', 'trialing'].includes(subscription.status),
+            customerId: customer.id,
+            billing_cycle_anchor: subscription.billing_cycle_anchor,
+            cancel_at_period_end: subscription.cancel_at_period_end,
+            // Asegurar compatibilidad con el frontend
+            message: 'Suscripción encontrada'
+        };
+
+        res.json(response);
+
+    } catch (error) {
         console.error('Error al obtener la suscripción:', error);
-        res.status(500).json({ error: 'Error al verificar suscripción' });
-      }
+        res.status(500).json({ 
+            subscribed: false,
+            error: 'Error al verificar suscripción',
+            details: error.message 
+        });
+    }
 };
 
 const getPrices =  async (req, res) => {
@@ -132,6 +231,8 @@ const getPrices =  async (req, res) => {
         res.status(500).json({ error: 'Error al obtener precios' });
     }
 };
+
+
 
 const webhook =async (req, res) => {
     const sig = req.headers['stripe-signature'];
@@ -164,7 +265,7 @@ module.exports = {
     PostCheckoutSession,
     postCustomer,
     getProducts,
+    getSuscriptionById,
     getPrices,
     webhook,
-    getProductsById
 }

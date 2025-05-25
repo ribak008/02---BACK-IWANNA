@@ -4,9 +4,9 @@ const { select } = require('../utils/consultas');
 const getUsuarioPorEmail = async (req, res) => {
     const email = req.params.email;
     try {
-        const sql = `-- sql Usuario por email
+        const sql = `
                     SELECT u.id,
-                        u.nombre,
+                        CONCAT(u.nombre, ' ', u.apellido) as "nombre",
                         u.email,
                         u.telefono,
                         u.rut,
@@ -37,28 +37,32 @@ const getUsuarioPorEmail = async (req, res) => {
 };
 
 const createUser = async (req, res) => {
-    const { nombre, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id_comuna } = req.body;
+    const { nombre, apellido, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo} = req.body;
+    
     try {
-        const sql = `INSERT INTO usuario (nombre, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id_comuna) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-        const usuario = await select(sql, [nombre, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id_comuna]);
-        res.json(usuario);
+        const sql = `INSERT INTO usuario (nombre, apellido, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+        
+        // Ejecutar la consulta
+        const result = await select(sql, [nombre, apellido, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo]);
+        
+        // Enviar respuesta con el ID insertado
+        res.json({
+            success: true,
+            userId: result.insertId, // Asegúrate de que tu función select devuelva el insertId
+            message: 'Usuario creado exitosamente'
+        });
+        
     } catch (err) {
         console.error('Error al crear usuario:', err);
-        res.status(500).json({ error: 'Error al crear usuario' });
+        res.status(500).json({ 
+            success: false,
+            error: 'Error al crear usuario',
+            details: err.message 
+        });
     }
 };
 
-const createUserPrueba = async (req, res) => {
-    const {nombre,apellido,email,telefono,rut,id_sexo,id_estado,id_tipo,edad} = req.body;
-    try {
-        const sql = `insert into usuario (nombre,apellido,email,telefono,rut,id_sexo,id_estado,id_tipo,edad) values (?,?,?,?,?,?,?,?,?);`;
-        const usuario = await select(sql,[nombre,apellido,email,telefono,rut,id_sexo,id_estado,id_tipo,edad]);
-        res.json(usuario);
-    } catch (err) {
-        console.error('Error al crear usuario desde userprueba:', err);
-        res.status(500).json({ error: 'Error al crear usuario' });
-    }
-}
 
 const updateUser = async (req, res) => {
     const { id, nombre, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id_direccion } = req.body;
@@ -93,39 +97,9 @@ const updateUser = async (req, res) => {
     }
 };
 
-const getUsuarioPorEmailPrueba = async (req, res) => {
-    const email = req.params.email;
-    try {
-        const sql = `SELECT 
-                        nombre,
-                        apellido,
-                        email,
-                        telefono,
-                        rut,
-                        id_sexo,
-                        id_estado,
-                        id_tipo,
-                        edad
-                    FROM usuario 
-                    WHERE email = ?`; 
-        const usuario = await select(sql, email);
-        console.log('Usuario encontrado:', usuario); // Log para debugging
-        
-        if (usuario.length === 0) {
-            return res.status(404).json({ message: 'Usuario no encontrado' });
-        }
-
-        res.json(usuario[0]);
-    } catch (err) {
-        console.error('Error al consultar usuario:', err);
-        res.status(500).json({ error: 'Error al obtener usuario' });
-    }
-};
 
 module.exports = {
     getUsuarioPorEmail,
     createUser,
     updateUser,
-    createUserPrueba,
-    getUsuarioPorEmailPrueba
 }

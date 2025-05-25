@@ -1,5 +1,6 @@
 const { select } = require('../utils/consultas');
 
+
 const getFavoritosPost = async (req, res) => {
     const id = req.params.id;
     try {

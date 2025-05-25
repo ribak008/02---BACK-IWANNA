@@ -5,6 +5,7 @@ const categoryRoutes = require('./routes/categoryRoutes')
 const postRoutes = require('./routes/postRoutes')
 const chatRoutes = require('./routes/chatRoutes')
 const direccionRoutes = require('./routes/direccionRoutes')
+const favoritosRoutes = require('./routes/favoritosRoutes')
 const s3Routes = require('./routes/s3/s3Routes')
 
 const app = express();
@@ -18,6 +19,8 @@ app.use('/category', categoryRoutes);
 app.use('/post', postRoutes);
 app.use('/chat', chatRoutes);
 app.use('/direccion', direccionRoutes);
+app.use('/favoritos', favoritosRoutes)
+
 app.use("/s3", s3Routes);
 
 //INICIA LA API
