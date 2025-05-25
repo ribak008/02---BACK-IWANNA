@@ -184,13 +184,25 @@ const getSuscriptionById = async (req, res) => {
             expand: ['product']
         });
 
-        // 4. Formatear fecha de vencimiento
-        const expiryDate = new Date(subscription.current_period_end * 1000);
-        const formattedExpiryDate = expiryDate.toLocaleDateString('es-ES', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
+        // 4. Formatear fechas
+        const formatDate = (timestamp) => {
+            if (!timestamp) return null;
+            const date = new Date(timestamp * 1000);
+            return date.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        };
+
+        //formateo a peso chileno
+        const formatter = new Intl.NumberFormat('es-CL', {
+            style: 'currency',
+            currency: 'CLP',
+            });
+    
+        const amount = formatter.format(price.unit_amount);
+        const currency = price.currency.toUpperCase();
 
         // 5. Construir respuesta
         const response = {
@@ -199,15 +211,18 @@ const getSuscriptionById = async (req, res) => {
             planId: price.id,
             productId: price.product.id,
             planName: price.product.name,
-            price: price.unit_amount / 100,
-            currency: price.currency,
-            current_period_end: subscription.current_period_end,
-            formattedExpiryDate: formattedExpiryDate,
+            price: `${amount} ${currency}`,
+            currency: price.currency.toUpperCase(),
+            // Usar las fechas formateadas
+            dateStart: subscription.current_period_start,
+            dateStartFormatted: formatDate(subscription.current_period_start),
+            dateEnd: subscription.current_period_end,
+            dateEndFormatted: formatDate(subscription.current_period_end),
             isActive: ['active', 'trialing'].includes(subscription.status),
             customerId: customer.id,
             billing_cycle_anchor: subscription.billing_cycle_anchor,
+            billing_cycle_anchor_formatted: formatDate(subscription.billing_cycle_anchor),
             cancel_at_period_end: subscription.cancel_at_period_end,
-            // Asegurar compatibilidad con el frontend
             message: 'Suscripción encontrada'
         };
 
