@@ -12,7 +12,7 @@ const insertDireccion = async (req, res) => {
 
     try {
         const sql = `-- sql nombre
-            INSERT INTO direccion_usuario (id,descripcion,latitud, longitud)
+            INSERT INTO direccion_usuario (id_usuario,descripcion,latitud, longitud)
             VALUES (?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE
                 descripcion = VALUES(descripcion),
