@@ -65,7 +65,7 @@ const createUser = async (req, res) => {
 
 
 const updateUser = async (req, res) => {
-    const { id, nombre, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id_direccion } = req.body;
+    const { id, nombre, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto } = req.body;
     try {
         const sql = `-- sql Actualiza usuario
                     UPDATE 
@@ -81,11 +81,10 @@ const updateUser = async (req, res) => {
                         id_profesion = ?, 
                         id_estado = ?, 
                         id_tipo = ?, 
-                        foto = ?, 
-                        id_direccion = ? 
+                        foto = ?
                     WHERE 
                         id = ?`;
-        const resultado = await select(sql, [nombre, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id_direccion, id]);
+        const resultado = await select(sql, [nombre, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo, foto, id]);
         
         if (!resultado) {
             return res.status(500).json({ exito: false});

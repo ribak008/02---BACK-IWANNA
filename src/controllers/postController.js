@@ -4,8 +4,40 @@ const { select } = require('../utils/consultas');
 
 const getPosts = async (req, res) => {
     try {
-        const sql_posts = "SELECT * FROM post" 
+        const sql_posts = `-- sql getPosts
+        SELECT 
+            p.id,
+            p.detalle,
+            p.archivo,
+            p.fecha_creacion,
+            CONCAT(u.nombre,' ',u.apellido) as "nombre",
+            u.foto
+        FROM post p 
+        JOIN usuario u ON u.id = p.id_usuario`;
         const posts = await select(sql_posts);
+        res.json(posts);
+    } catch (err) {
+        console.error('Error al consultar posts:', err);
+        res.status(500).json({ error: 'Error al obtener posts' });
+    }
+};
+
+const getPostByUser = async (req, res) => {
+    try {
+        const id_usuario = req.params.userId;
+        console.log(req.params)
+        const sql_posts = `-- sql getPostsById
+            SELECT 
+                p.id,
+                p.detalle,
+                p.archivo,
+                p.fecha_creacion,
+                CONCAT(u.nombre,' ',u.apellido) as "nombre",
+                u.foto
+            FROM post p 
+            JOIN usuario u ON u.id = p.id_usuario
+            WHERE u.id = ?`;
+        const posts = await select(sql_posts,[id_usuario]);
         res.json(posts);
     } catch (err) {
         console.error('Error al consultar posts:', err);
@@ -50,5 +82,6 @@ const getPostByCategory = async (req, res) => {
 
 module.exports = {
     getPosts,
+    getPostByUser,
     getPostByCategory
 }
