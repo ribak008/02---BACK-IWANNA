@@ -37,14 +37,14 @@ const getUsuarioPorEmail = async (req, res) => {
 };
 
 const createUser = async (req, res) => {
-    const { nombre, apellido, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo} = req.body;
+    const { nombre, apellido, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo,direccion} = req.body;
     
     try {
-        const sql = `INSERT INTO usuario (nombre, apellido, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+        const sql = `INSERT INTO usuario (nombre, apellido, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo,direccion) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)`;
         
         // Ejecutar la consulta
-        const result = await select(sql, [nombre, apellido, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo]);
+        const result = await select(sql, [nombre, apellido, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo,direccion]);
         
         // Enviar respuesta con el ID insertado
         res.json({
