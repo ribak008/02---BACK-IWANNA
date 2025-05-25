@@ -20,7 +20,7 @@ const getUsuarioPorEmail = async (req, res) => {
                         u.foto,
                         d.descripcion as "direccion"
                     FROM usuario u
-                    JOIN direccion_usuario d ON d.id = u.id
+                    LEFT JOIN direccion_usuario d ON d.id_usuario = u.id
                     LEFT JOIN profesion p ON p.id = u.id_profesion
                     WHERE u.email = ?`; 
         const usuario = await select(sql,email);

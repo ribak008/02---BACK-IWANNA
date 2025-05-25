@@ -7,9 +7,6 @@ const chatRoutes = require('./routes/chatRoutes')
 const direccionRoutes = require('./routes/direccionRoutes')
 const s3Routes = require('./routes/s3/s3Routes')
 
-
-
-
 const app = express();
 
 app.use(express.json());
