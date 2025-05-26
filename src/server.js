@@ -1,27 +1,27 @@
-const express = require('express');
-const usuarioRutas = require('./routes/usuariosRoutes')
-const paymentStripe = require('./routes/paymentStripe')
-const categoryRoutes = require('./routes/categoryRoutes')
-const postRoutes = require('./routes/postRoutes')
-const chatRoutes = require('./routes/chatRoutes')
-const direccionRoutes = require('./routes/direccionRoutes')
-const favoritosRoutes = require('./routes/favoritosRoutes')
-const s3Routes = require('./routes/s3/s3Routes')
-const cotizacionRoutes = require('./routes/cotizacionRoutes')
+const express = require("express");
+const usuarioRutas = require("./routes/usuariosRoutes");
+const paymentStripe = require("./routes/paymentStripe");
+const categoryRoutes = require("./routes/categoryRoutes");
+const postRoutes = require("./routes/postRoutes");
+const chatRoutes = require("./routes/chatRoutes");
+const direccionRoutes = require("./routes/direccionRoutes");
+const favoritosRoutes = require("./routes/favoritosRoutes");
+const s3Routes = require("./routes/s3/s3Routes");
+const cotizacionRoutes = require("./routes/cotizacionRoutes");
 
 const app = express();
 
 app.use(express.json());
 
 //RUTAS
-app.use('/usuarios', usuarioRutas);
-app.use('/payment', paymentStripe);
-app.use('/category', categoryRoutes);
-app.use('/post', postRoutes);
-app.use('/chat', chatRoutes);
-app.use('/direccion', direccionRoutes);
-app.use('/favoritos', favoritosRoutes)
-app.use('/cotizacion', cotizacionRoutes);
+app.use("/usuarios", usuarioRutas);
+app.use("/payment", paymentStripe);
+app.use("/category", categoryRoutes);
+app.use("/post", postRoutes);
+app.use("/chat", chatRoutes);
+app.use("/direccion", direccionRoutes);
+app.use("/favoritos", favoritosRoutes);
+app.use("/cotizacion", cotizacionRoutes);
 app.use("/s3", s3Routes);
 
 //INICIA LA API
