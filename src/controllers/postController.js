@@ -46,23 +46,17 @@ const getPostByUser = async (req, res) => {
 };
 
 const getPostByCategory = async (req, res) => {
-    const id = req.params.id;
+    const id = req.params.categoryId;
+    console.log(req.params)
     try {
         const sql = 
         `SELECT
             p.id,
-            p.titulo,
-            p.detalle, 
-            p.imagen,
-            p.video, 
-            p.id_usuario,
-            area.id,
-            area.descripcion, 
-            prof.id, 
-            u.id_estado,
-            u.foto, 
-            p.fecha_creacion,
-            u.nombre
+                p.detalle,
+                p.archivo,
+                p.fecha_creacion,
+                CONCAT(u.nombre,' ',u.apellido) as "nombre",
+                u.foto
         
         FROM post p
         JOIN usuario u ON u.id = p.id_usuario  
