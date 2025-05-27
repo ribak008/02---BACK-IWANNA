@@ -5,7 +5,8 @@ const getUsuarioPorEmail = async (req, res) => {
   try {
     const sql = `
                     SELECT u.id,
-                        CONCAT(u.nombre, ' ', u.apellido) as "nombre",
+                        u.nombre,
+                        u.apellido,
                         u.email,
                         u.telefono,
                         u.rut,
@@ -91,6 +92,7 @@ const updateUser = async (req, res) => {
   const {
     id,
     nombre,
+    apellido,
     email,
     telefono,
     rut,
@@ -108,6 +110,7 @@ const updateUser = async (req, res) => {
                         usuario 
                     SET 
                         nombre = ?, 
+                        apellido = ?, 
                         email = ?, 
                         telefono = ?, 
                         rut = ?, 
@@ -122,6 +125,7 @@ const updateUser = async (req, res) => {
                         id = ?`;
     const resultado = await select(sql, [
       nombre,
+      apellido,
       email,
       telefono,
       rut,

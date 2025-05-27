@@ -1,9 +1,10 @@
 const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+const { select } = require("../utils/consultas");
 
 const PostCheckoutSession = async (req, res) => {
     try {
-        const { priceId, customerId } = req.body;
+        const { priceId, customerId, userId } = req.body;
 
         // Verificar que el cliente exista
         let customer;
@@ -20,6 +21,7 @@ const PostCheckoutSession = async (req, res) => {
         // Verificar si el cliente ya tiene una suscripción activa
         const subscriptions = await stripe.subscriptions.list({
             customer: customerId,
+
             status: 'all',
             limit: 1
         });
@@ -50,9 +52,17 @@ const PostCheckoutSession = async (req, res) => {
             cancel_url: process.env.CANCEL_URL,
             metadata: {
                 platform: 'react-native',
-                customer_id: customerId
+                customer_id: customerId,
+                user_id: userId
             }
         });
+
+        // Actualizar el estado del usuario
+        const sql = `UPDATE usuario SET id_estado = 2 WHERE id = ?`;
+        const resultado = await select(sql, [userId]);
+        if (!resultado) {
+            return res.status(500).json({ exito: false });
+        }
 
         res.json({ 
             url: session.url,

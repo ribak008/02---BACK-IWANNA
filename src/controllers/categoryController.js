@@ -18,7 +18,7 @@ const getCategoryTrabajadores = async (req, res) => {
   try {
     const sql_category = `SELECT	
         u.id,
-        u.nombre,
+        CONCAT(u.nombre,' ',u.apellido) as "nombre",
         u.foto,
         p.descripcion
 
@@ -62,7 +62,7 @@ const getCategoryPosts = async (req, res) => {
         u.id_estado,
         u.foto, 
         p.fecha_creacion,
-        u.nombre
+        CONCAT(u.nombre,' ',u.apellido) as "nombre"
     
         FROM post p
         JOIN usuario u ON u.id = p.id_usuario  

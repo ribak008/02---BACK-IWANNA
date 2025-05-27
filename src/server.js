@@ -8,12 +8,13 @@ const direccionRoutes = require("./routes/direccionRoutes");
 const favoritosRoutes = require("./routes/favoritosRoutes");
 const s3Routes = require("./routes/s3/s3Routes");
 const cotizacionRoutes = require("./routes/cotizacionRoutes");
-
+const estadoRoutes = require("./routes/estadoRoutes");
 const app = express();
 
 app.use(express.json());
 
 //RUTAS
+app.use("/estado", estadoRoutes);
 app.use("/usuarios", usuarioRutas);
 app.use("/payment", paymentStripe);
 app.use("/category", categoryRoutes);

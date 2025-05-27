@@ -10,7 +10,8 @@ const getPosts = async (req, res) => {
             p.detalle,
             p.archivo,
             p.fecha_creacion,
-            CONCAT(u.nombre,' ',u.apellido) as "nombre",
+            u.nombre,
+            u.apellido,
             u.foto
         FROM post p 
         JOIN usuario u ON u.id = p.id_usuario`;
@@ -32,7 +33,8 @@ const getPostByUser = async (req, res) => {
                 p.detalle,
                 p.archivo,
                 p.fecha_creacion,
-                CONCAT(u.nombre,' ',u.apellido) as "nombre",
+                u.nombre,
+                u.apellido,
                 u.foto
             FROM post p 
             JOIN usuario u ON u.id = p.id_usuario
@@ -55,7 +57,8 @@ const getPostByCategory = async (req, res) => {
                 p.detalle,
                 p.archivo,
                 p.fecha_creacion,
-                CONCAT(u.nombre,' ',u.apellido) as "nombre",
+                u.nombre,
+                u.apellido,
                 u.foto
         
         FROM post p
