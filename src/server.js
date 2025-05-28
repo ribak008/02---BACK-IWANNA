@@ -9,6 +9,7 @@ const favoritosRoutes = require("./routes/favoritosRoutes");
 const s3Routes = require("./routes/s3/s3Routes");
 const cotizacionRoutes = require("./routes/cotizacionRoutes");
 const estadoRoutes = require("./routes/estadoRoutes");
+const perfilRoutes = require("./routes/perfilRoutes");
 const app = express();
 
 app.use(express.json());
@@ -24,6 +25,7 @@ app.use("/direccion", direccionRoutes);
 app.use("/favoritos", favoritosRoutes);
 app.use("/cotizacion", cotizacionRoutes);
 app.use("/s3", s3Routes);
+app.use("/perfil", perfilRoutes);
 
 //INICIA LA API
 const PORT = process.env.PORT || 3000;
