@@ -1,4 +1,4 @@
-const { select } = require("../utils/consultas");
+const { select, insert, update } = require("../utils/consultas");
 
 const getUsuarioPorEmail = async (req, res) => {
   const email = req.params.email;

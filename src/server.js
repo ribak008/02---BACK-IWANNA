@@ -22,7 +22,7 @@ app.use("/category", categoryRoutes);
 app.use("/post", postRoutes);
 app.use("/chat", chatRoutes);
 app.use("/direccion", direccionRoutes);
-app.use("/favoritos", favoritosRoutes);
+app.use("/fav", favoritosRoutes);
 app.use("/cotizacion", cotizacionRoutes);
 app.use("/s3", s3Routes);
 app.use("/perfil", perfilRoutes);
