@@ -17,6 +17,7 @@ const getUsuarioPorEmail = async (req, res) => {
                         u.id_profesion,
                         u.id_estado,
                         u.id_tipo,
+                        u.id_auth,
                         u.foto,
                         d.descripcion as "direccion"
                     FROM usuario u
@@ -49,12 +50,13 @@ const createUser = async (req, res) => {
     id_profesion,
     id_estado,
     id_tipo,
+    id_auth,
     direccion,
   } = req.body;
 
   try {
-    const sql = `INSERT INTO usuario (nombre, apellido, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo,direccion) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)`;
+    const sql = `INSERT INTO usuario (nombre, apellido, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo,id_auth,direccion) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,1,?)`;
 
     // Ejecutar la consulta
     const result = await select(sql, [
@@ -69,6 +71,7 @@ const createUser = async (req, res) => {
       id_profesion,
       id_estado,
       id_tipo,
+      id_auth,
       direccion,
     ]);
 
@@ -102,6 +105,7 @@ const updateUser = async (req, res) => {
     id_profesion,
     id_estado,
     id_tipo,
+    id_auth,
     foto,
   } = req.body;
   try {
