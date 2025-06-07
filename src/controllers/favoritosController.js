@@ -12,6 +12,7 @@ const getFavoritosPost = async (req, res) => {
                   p.detalle,
                   p.archivo,
                   p.fecha_creacion,
+                  u.id as id_usuario,
                   u.nombre,
                   u.apellido,
                   u.foto,
@@ -20,7 +21,9 @@ const getFavoritosPost = async (req, res) => {
           FROM post p
           JOIN usuario u ON u.id = p.id_usuario  
           JOIN fav_post fp ON fp.id_post = p.id
-          WHERE fp.id_estado = 2 AND fp.id_usuario = ?;`;
+          WHERE fp.id_estado = 2 AND fp.id_usuario = ?
+          ORDER BY fp.id DESC
+          ;`;
       const post = await select(sql, [id]);
       console.log(post);
       if (post.length === 0) {
@@ -42,13 +45,15 @@ const getFavoritosTrabajador = async (req, res) => {
 
         u.id,
         u.nombre,
+        u.apellido,
         u.foto,
         p.descripcion,
         ft.id_estado 
         FROM usuario u
         JOIN profesion p on p.id = u.id_profesion 
-        JOIN fav_trabajador ft on ft.id_trabajador = u.id
+        JOIN fav_trabajadores ft on ft.id_trabajador = u.id
         WHERE ft.id_estado = 2 AND ft.id_usuario = ?
+        ORDER BY ft.id DESC
         ;
         `;
         const favoritos = await select(sql, [id]);
@@ -68,16 +73,6 @@ const createFavoritosPost = async (req, res) => {
     const { idPost, idUser } = req.params;
     
     try {
-        // First, verify if the post exists
-        const postExists = await select('SELECT id FROM post WHERE id = ?', [idPost]);
-        if (postExists.length === 0) {
-            return res.status(404).json({ 
-                exito: false,
-                error: 'El post no existe',
-                idPost
-            });
-        }
-
         // Check if the favorite already exists
         const checkSql = `SELECT * FROM fav_post WHERE id_post = ? AND id_usuario = ?`;
         const exists = await select(checkSql, [idPost, idUser]);
@@ -120,39 +115,45 @@ const createFavoritosPost = async (req, res) => {
 
 const createFavoritosTrabajador = async (req, res) => {
     console.log('Llamada a createFavoritosTrabajador con:', req.params);
-    const { idTrabajador, idUser } = req.params;
+    const { idUser, idTrabajador } = req.params;
 
     try {
-        const checkSql = `SELECT * FROM fav_trabajador WHERE id_trabajador = ? AND id_usuario = ?`;
-        const favorito = await select(checkSql, [idTrabajador, idUser]);
+        // select para ver si existe el favorito
+        const checkSql = `SELECT * FROM fav_trabajadores WHERE id_usuario = ? AND id_trabajador = ?`;
+        const exists = await select(checkSql, [idUser, idTrabajador]);
         
-        let result;
-        if (favorito) {
+        if (exists && exists.length > 0) {
+            // si existe el fav: upadate para cambiar el estado 
+            const newStatus = exists[0].id_estado === 2 ? 1 : 2;
+            const updateSql = `UPDATE fav_trabajadores SET id_estado = ? WHERE id_usuario = ? AND id_trabajador = ?`;
+            await update(updateSql, [newStatus, idUser, idTrabajador]);
             
-            const nuevoEstado = favorito.id_estado === 2 ? 1 : 2;
-            const updateSql = `UPDATE fav_trabajador SET id_estado = ? WHERE id_trabajador = ? AND id_usuario = ?`;
-            result = await update(updateSql, [nuevoEstado, idTrabajador, idUser]);
             return res.json({ 
                 exito: true,
-                estado: nuevoEstado,
-                mensaje: `Favorito ${nuevoEstado === 1 ? 'activado' : 'desactivado'} correctamente`
+                accion: 'actualizado',
+                estado: newStatus,
+                idTrabajador,
+                idUser
             });
         } else {
+            // si no existe: insert para crear el favorito
+            const insertSql = `INSERT INTO fav_trabajadores (id_usuario, id_trabajador, id_estado) VALUES (?, ?, 2)`;
+            await insert(insertSql, [idUser, idTrabajador]);
             
-            const insertSql = `INSERT INTO fav_trabajador (id_trabajador, id_usuario, id_estado) VALUES (?, ?, 1)`;
-            result = await insert(insertSql, [idTrabajador, idUser]);
             return res.json({ 
                 exito: true,
-                estado: 1,
-                mensaje: 'Favorito creado correctamente'
+                accion: 'creado',
+                estado: 2,
+                idTrabajador,
+                idUser
             });
         }
     } catch (err) {
-        console.error('Error en createFavoritosTrabajador:', err);
+        console.error('Error en createFavoritosPost:', err);
         return res.status(500).json({ 
             exito: false,
             error: 'Error al procesar la solicitud de favoritos',
-            detalle: err.message
+            detalle: err.message 
         });
     }
 };
@@ -177,7 +178,7 @@ const likeTrabajador = async (req, res) => {
     try {
         const sql = 
         `SELECT COUNT(*) as likes
-        FROM fav_trabajador 
+        FROM fav_trabajadores 
         WHERE id_trabajador = ? AND id_estado = 2`;
         const result = await select(sql, [idTrabajador]);
         res.json({ likes: result[0].likes });
@@ -207,11 +208,12 @@ const likesUserPost = async (req, res) => {
 };
 
 const likesUserTrabajador = async (req, res) => {
+    console.log('Llamada a likesUserTrabajador con:', req.params);
     const { idUser, idTrabajador } = req.params;
     try {
         const sql = 
         `SELECT * 
-        FROM fav_trabajador 
+        FROM fav_trabajadores 
         WHERE id_usuario = ? AND id_trabajador = ? AND id_estado = 2`;
         const result = await select(sql, [idUser, idTrabajador]);
         if (result.length === 0) {

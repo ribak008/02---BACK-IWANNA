@@ -18,7 +18,11 @@ const getCategoryTrabajadores = async (req, res) => {
   try {
     const sql_category = `SELECT	
         u.id,
-        CONCAT(u.nombre,' ',u.apellido) as "nombre",
+        u.nombre,
+        u.apellido,
+        u.id_estado,
+        u.id_auth,
+        u.id_tipo,
         u.foto,
         p.descripcion
 
@@ -49,26 +53,27 @@ const getProfesiones = async (req, res) => {
 const getCategoryPosts = async (req, res) => {
   const id = req.params.id;
   try {
-    const sql_category = `SELECT	
-        p.id,
-        p.titulo,
-        p.detalle, 
-        p.imagen,
-        p.video, 
-        p.id_usuario,
-        ap.id,
-        ap.descripcion, 
-        prof.id, 
-        u.id_estado,
-        u.foto, 
-        p.fecha_creacion,
-        CONCAT(u.nombre,' ',u.apellido) as "nombre"
-    
-        FROM post p
-        JOIN usuario u ON u.id = p.id_usuario  
-        JOIN profesion prof ON prof.id = u.id_profesion 
-        JOIN area_profesion ap ON ap.id = prof.id_area
-        WHERE ap.id = ?;`;
+    const sql_category = `	
+    SELECT	
+    p.id,
+    p.detalle, 
+    p.archivo,
+    p.id_usuario,
+    ap.id AS id_area_profesion,
+    ap.descripcion AS descripcion_area, 
+    prof.id AS id_profesion,
+    u.id_estado,
+    u.foto, 
+    p.fecha_creacion,
+    u.id_auth,
+    u.nombre,
+    u.apellido
+FROM post p
+JOIN usuario u ON u.id = p.id_usuario  
+JOIN profesion prof ON prof.id = u.id_profesion 
+JOIN area_profesion ap ON ap.id = prof.id_area
+WHERE ap.id = ?
+ORDER BY p.id DESC;`;
     const categorias = await select(sql_category, [id]);
     res.json(categorias);
   } catch (err) {

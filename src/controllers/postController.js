@@ -11,9 +11,12 @@ const getPosts = async (req, res) => {
             u.nombre,
             u.apellido,
             u.foto,
+            u.id_auth,
             u.id as id_usuario -- agregado para el post de usuario
+            
         FROM post p 
-        JOIN usuario u ON u.id = p.id_usuario`;
+        JOIN usuario u ON u.id = p.id_usuario
+        ORDER BY p.id DESC;`;
     const posts = await select(sql_posts);
     res.json(posts);
   } catch (err) {
@@ -37,7 +40,8 @@ const getPostByUser = async (req, res) => {
                 u.foto
             FROM post p 
             JOIN usuario u ON u.id = p.id_usuario
-            WHERE u.id = ?`;
+            WHERE u.id = ?
+            ORDER BY p.id DESC;`;
     const posts = await select(sql_posts, [id_usuario]);
     res.json(posts);
   } catch (err) {
@@ -63,7 +67,8 @@ const getPostByCategory = async (req, res) => {
         JOIN usuario u ON u.id = p.id_usuario  
         JOIN profesion prof ON prof.id = u.id_profesion 
         JOIN area_profesion area ON area.id = prof.id_area
-        WHERE area.id = ?;`;
+        WHERE area.id = ?
+        ORDER BY p.id DESC;`;
     const post = await select(sql, [id]);
     if (post.length === 0) {
       return res.status(404).json({ message: "Post no encontrado" });

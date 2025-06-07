@@ -1,8 +1,14 @@
 const Stripe = require('stripe');
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+// Configure Stripe with API version and timeout
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: '2023-10-16', // Use the latest API version
+    timeout: 20000, // 20 seconds timeout
+    maxNetworkRetries: 2, // Retry failed requests
+});
 const { select } = require("../utils/consultas");
 
 const PostCheckoutSession = async (req, res) => {
+    console.log('Creando sesión de pago con datos:', req.body);
     try {
         const { priceId, customerId, userId } = req.body;
 
@@ -44,36 +50,67 @@ const PostCheckoutSession = async (req, res) => {
             mode: 'subscription',
             customer: customerId,
             payment_method_types: ['card'],
+            success_url: process.env.SUCCESS_URL,
+            cancel_url: process.env.CANCEL_URL,
             line_items: [{
                 price: priceId, 
                 quantity: 1
             }],
-            success_url: process.env.SUCCESS_URL,
-            cancel_url: process.env.CANCEL_URL,
+    
             metadata: {
                 platform: 'react-native',
                 customer_id: customerId,
                 user_id: userId
             }
+
         });
 
         // Actualizar el estado del usuario
-        const sql = `UPDATE usuario SET id_estado = 2 WHERE id = ?`;
-        const resultado = await select(sql, [userId]);
-        if (!resultado) {
-            return res.status(500).json({ exito: false });
+        console.log('Actualizando estado del usuario:', userId);
+        try {
+            const sql = `UPDATE usuario SET id_estado = 2 WHERE id = ?`;
+            await select(sql, [userId]);
+            console.log('Estado del usuario actualizado exitosamente');
+            
+            res.json({ 
+                url: session.url,
+                sessionId: session.id
+            });
+        } catch (dbError) {
+            console.error('Error al actualizar el estado del usuario:', dbError);
+            // Aún así devolvemos la sesión ya que el pago se procesó correctamente
+            res.json({ 
+                url: session.url,
+                sessionId: session.id,
+                warning: 'El pago se procesó correctamente, pero hubo un error al actualizar el estado del usuario'
+            });
         }
 
-        res.json({ 
-            url: session.url,
-            sessionId: session.id
-        });
-
     } catch (error) {
-        console.error('Error al crear sesión de pago:', error);
+        console.error('Error al crear sesión de pago:', {
+            name: error.name,
+            message: error.message,
+            code: error.code,
+            stack: error.stack
+        });
+        
+        // More specific error messages based on error type
+        if (error.code === 'ECONNRESET') {
+            return res.status(503).json({ 
+                error: 'Error de conexión con el servicio de pagos',
+                details: 'No se pudo establecer conexión con el servidor de pagos. Por favor, intente nuevamente.'
+            });
+        } else if (error.type === 'StripeConnectionError') {
+            return res.status(503).json({
+                error: 'Error de conexión con el servicio de pagos',
+                details: 'No se pudo conectar con el servicio de pagos. Por favor, verifique su conexión a internet e intente nuevamente.'
+            });
+        }
+        
         res.status(500).json({ 
             error: 'Error al procesar el pago',
-            details: error.message 
+            details: error.message,
+            code: error.code || 'UNKNOWN_ERROR'
         });
     }
 };
