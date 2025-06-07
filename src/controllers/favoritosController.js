@@ -92,13 +92,13 @@ const createFavoritosPost = async (req, res) => {
             });
         } else {
             // Insert new favorite with status 1 (active)
-            const insertSql = `INSERT INTO fav_post (id_post, id_usuario, id_estado) VALUES (?, ?, 1)`;
+            const insertSql = `INSERT INTO fav_post (id_post, id_usuario, id_estado) VALUES (?, ?, 2)`;
             await insert(insertSql, [idPost, idUser]);
             
             return res.json({ 
                 exito: true,
                 accion: 'creado',
-                estado: 1,
+                estado: 2,
                 idPost,
                 idUser
             });
