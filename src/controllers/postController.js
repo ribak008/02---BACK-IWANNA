@@ -1,4 +1,4 @@
-const { select } = require("../utils/consultas");
+const { select, update } = require("../utils/consultas");
 
 const getPosts = async (req, res) => {
   try {
@@ -12,8 +12,8 @@ const getPosts = async (req, res) => {
             u.apellido,
             u.foto,
             u.id_auth,
-            u.id as id_usuario -- agregado para el post de usuario
-            
+            u.id as id_usuario, -- agregado para el post de usuario
+            (SELECT COUNT(*) FROM comentario_post cp WHERE cp.post_id = p.id) AS total_comentarios
         FROM post p 
         JOIN usuario u ON u.id = p.id_usuario
         ORDER BY p.id DESC;`;
@@ -37,7 +37,8 @@ const getPostByUser = async (req, res) => {
                 p.fecha_creacion,
                 u.nombre,
                 u.apellido,
-                u.foto
+                u.foto,
+                (SELECT COUNT(*) FROM comentario_post cp WHERE cp.post_id = p.id) AS total_comentarios
             FROM post p 
             JOIN usuario u ON u.id = p.id_usuario
             WHERE u.id = ?
@@ -61,8 +62,8 @@ const getPostByCategory = async (req, res) => {
                 p.fecha_creacion,
                 u.nombre,
                 u.apellido,
-                u.foto
-        
+                u.foto,
+                (SELECT COUNT(*) FROM comentario_post cp WHERE cp.post_id = p.id) AS total_comentarios
         FROM post p
         JOIN usuario u ON u.id = p.id_usuario  
         JOIN profesion prof ON prof.id = u.id_profesion 
@@ -80,8 +81,9 @@ const getPostByCategory = async (req, res) => {
   }
 };
 
+
 module.exports = {
-  getPosts,
-  getPostByUser,
-  getPostByCategory,
+    getPosts,
+    getPostByUser,
+    getPostByCategory,
 };
