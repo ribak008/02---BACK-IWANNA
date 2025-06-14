@@ -29,6 +29,7 @@ const createCotizacion = async (req, res) => {
       id_cliente,
       id_trabajador,
     ]);
+    console.log('chat creado: ', chat);
     res.json(chat);
   } catch (err) {
     console.error("Error al crear chat:", err);
@@ -98,6 +99,8 @@ const updateRespondido = async (req, res) => {
         SET id_estado = ?
         WHERE id = ?`;
       const resultado = await select(sql, [id_estado, id]);
+
+      console.log('chat actualizado: ', resultado);
       res.json(resultado);
     }
 
