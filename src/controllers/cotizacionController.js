@@ -19,6 +19,21 @@ const createCotizacion = async (req, res) => {
     console.error("Error al crear cotización:", err);
     res.status(500).json({ error: "Error al crear cotización" });
   }
+
+  //Crear datos en la tabla chat
+  try {
+    const sql = `
+        INSERT INTO chat (id_cliente, id_trabajador, f_creacion, id_estado) 
+        VALUES (?, ?, NOW(), 1)`;
+    const chat = await select(sql, [
+      id_cliente,
+      id_trabajador,
+    ]);
+    res.json(chat);
+  } catch (err) {
+    console.error("Error al crear chat:", err);
+    res.status(500).json({ error: "Error al crear chat" });
+  }
 };
 
 const createRespuestaCot = async (req, res) => {
@@ -74,6 +89,23 @@ const updateRespondido = async (req, res) => {
       message: "El id_estado es requerido",
     });
   }
+
+  //Updatear chat si el id_estado es 4
+  try {
+    if (id_estado === 4) {
+      const sql = `
+        UPDATE chat 
+        SET id_estado = ?
+        WHERE id = ?`;
+      const resultado = await select(sql, [id_estado, id]);
+      res.json(resultado);
+    }
+
+  } catch (err) {
+    console.error("Error al actualizar el chat:", err);
+    res.status(500).json({ error: "Error al actualizar el chat" });
+  }
+ 
 
   try {
     const sql = `

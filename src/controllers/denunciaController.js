@@ -1,6 +1,6 @@
 const { select } = require('../utils/consultas');
 
-const validateDenuncia = (req) => {
+const validateDenunciaPost = (req) => {
     const { idPost, idUsuario, tipo_denuncia, detalle_denuncia } = req.body;
     if (!idPost || !idUsuario || !tipo_denuncia || !detalle_denuncia) {
         return 'Todos los campos son requeridos: idPost, idUsuario, tipo_denuncia, detalle_denuncia';
@@ -8,9 +8,17 @@ const validateDenuncia = (req) => {
     return null;
 };
 
+const validateDenunciaTrabajador = (req) => {
+    const { idTrabajador, idUsuario, tipo_denuncia, detalle_denuncia } = req.body;
+    if (!idTrabajador || !idUsuario || !tipo_denuncia || !detalle_denuncia) {
+        return 'Todos los campos son requeridos: idTrabajador, idUsuario, tipo_denuncia, detalle_denuncia';
+    }
+    return null;
+};
+
 const createDenunciaPost = async (req, res) => {
-    console.log('Creando denuncia con datos:', req.body);
-    const validationError = validateDenuncia(req);
+    console.log('Creando denuncia_post con datos:', req.body);
+    const validationError = validateDenunciaPost(req);
     if (validationError) {
         return res.status(400).json({ exito: false, mensaje: validationError });
     }
@@ -26,9 +34,7 @@ const createDenunciaPost = async (req, res) => {
         
         res.json({ 
             exito: true, 
-            mensaje: 'Denuncia creada exitosamente',
-            id_post: idPost,
-            id_usuario: idUsuario
+
         });
     } catch (err) {
         console.error('Error al crear denuncia:', err);
@@ -41,17 +47,13 @@ const createDenunciaPost = async (req, res) => {
 };
 
 const createDenunciaTrabajador = async (req, res) => {
-    console.log('Creando denuncia con datos:', req.body);
-    const { idTrabajador, idUsuario, tipo_denuncia, detalle_denuncia } = req.body;
-    
-    // Validate required fields
-    if (!idTrabajador || !idUsuario || !tipo_denuncia || !detalle_denuncia) {
-        return res.status(400).json({ 
-            exito: false, 
-            mensaje: 'Todos los campos son requeridos: idTrabajador, idUsuario, tipo_denuncia, detalle_denuncia' 
-        });
+    console.log('Creando denuncia_trabajador con datos:', req.body);
+    const validationError = validateDenunciaTrabajador(req);
+    if (validationError) {
+        return res.status(400).json({ exito: false, mensaje: validationError });
     }
 
+    const { idTrabajador, idUsuario, tipo_denuncia, detalle_denuncia } = req.body;
     try {
         const sql = `INSERT INTO form_denuncia_trabajador (id_trabajador, id_usuario, tipo_denuncia, detalle_denuncia) VALUES (?, ?, ?, ?)`;
         const resultado = await select(sql, [idTrabajador, idUsuario, tipo_denuncia, detalle_denuncia]);
@@ -62,9 +64,7 @@ const createDenunciaTrabajador = async (req, res) => {
         
         res.json({ 
             exito: true, 
-            mensaje: 'Denuncia creada exitosamente',
-            id_trabajador: idTrabajador,
-            id_usuario: idUsuario
+
         });
     } catch (err) {
         console.error('Error al crear denuncia:', err);
