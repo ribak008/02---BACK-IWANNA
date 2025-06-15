@@ -1,6 +1,32 @@
 const { insert, select } = require('../../utils/consultas');
 require("dotenv").config();
 const axios = require('axios');
+const ffmpeg = require('fluent-ffmpeg');
+const ffmpegPath = require('ffmpeg-static');
+const { tmpdir } = require('os');
+const path = require('path');
+const fs = require('fs');
+
+ffmpeg.setFfmpegPath(ffmpegPath);
+
+function convertirVideoAH264(inputBuffer, outputPath) {
+    return new Promise((resolve, reject) => {
+        const tempInput = path.join(tmpdir(), `input_${Date.now()}.mp4`);
+        fs.writeFileSync(tempInput, inputBuffer);
+
+        ffmpeg(tempInput)
+            .videoCodec('libx264')
+            .format('mp4')
+            .on('end', () => {
+                const convertedBuffer = fs.readFileSync(outputPath);
+                fs.unlinkSync(tempInput); // Borra temporal
+                fs.unlinkSync(outputPath); // Borra temporal
+                resolve(convertedBuffer);
+            })
+            .on('error', reject)
+            .save(outputPath);
+    });
+}
 
 const postPublicacion = async (req, res) => {
     try {
@@ -24,11 +50,18 @@ const postPublicacion = async (req, res) => {
         const region = process.env.AWS_REGION;
         const url = `https://${bucket}.s3.${region}.amazonaws.com/${ruta}`;
 
+        let bufferFinal = archivo.buffer;
+
+        if (archivo.mimetype.includes('video')) {
+            const outputPath = path.join(tmpdir(), `output_${Date.now()}.mp4`);
+            bufferFinal = await convertirVideoAH264(archivo.buffer, outputPath);
+        }
+
         // 4. Subir archivo a S3 público
-        const response = await axios.put(url, archivo.buffer, {
+        const response = await axios.put(url, bufferFinal, {
             headers: {
                 'Content-Type': archivo.mimetype,
-                'Content-Length': archivo.size
+                'Content-Length': bufferFinal.length
             },
             maxBodyLength: Infinity,
         });
