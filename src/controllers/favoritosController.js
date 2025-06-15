@@ -16,6 +16,9 @@ const getFavoritosPost = async (req, res) => {
                   u.nombre,
                   u.apellido,
                   u.foto,
+                  u.id_estado as id_estado_suscripcion,
+                  u.id_tipo,
+                  u.id_auth,
                   fp.id_estado
           
           FROM post p
@@ -47,6 +50,9 @@ const getFavoritosTrabajador = async (req, res) => {
         u.nombre,
         u.apellido,
         u.foto,
+        u.id_estado as id_estado_suscripcion,
+        u.id_tipo,
+        u.id_auth,
         p.descripcion,
         ft.id_estado 
         FROM usuario u
