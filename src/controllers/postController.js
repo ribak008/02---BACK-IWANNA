@@ -10,11 +10,13 @@ const getPosts = async (req, res) => {
             p.fecha_creacion,
             u.nombre,
             u.apellido,
+            pro.descripcion as "profesion",
             u.foto,
             u.id_auth,
             u.id as id_usuario -- agregado para el post de usuario
         FROM post p 
         JOIN usuario u ON u.id = p.id_usuario
+        LEFT JOIN profesion pro ON pro.id = u.id_profesion
         ORDER BY p.id DESC;`;
     const posts = await select(sql_posts);
     res.json(posts);
