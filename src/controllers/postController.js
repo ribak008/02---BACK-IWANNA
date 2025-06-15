@@ -36,7 +36,7 @@ const getPostByUser = async (req, res) => {
                 p.fecha_creacion,
                 u.nombre,
                 u.apellido,
-                u.foto,
+                u.foto
             FROM post p 
             JOIN usuario u ON u.id = p.id_usuario
             WHERE u.id = ?
