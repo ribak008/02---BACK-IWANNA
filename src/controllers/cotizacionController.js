@@ -22,15 +22,34 @@ const createCotizacion = async (req, res) => {
 
   //Crear datos en la tabla chat
   try {
-    const sql = `
-        INSERT INTO chat (id_cliente, id_trabajador, f_creacion, id_estado) 
-        VALUES (?, ?, NOW(), 1)`;
-    const chat = await select(sql, [
+    const sql_chat = `
+    SELECT id
+    FROM chat
+    WHERE id_cliente = ? AND id_trabajador = ?;
+    `;
+    const get_chat = await select(sql_chat, [
       id_cliente,
       id_trabajador,
     ]);
-    console.log('chat creado: ', chat);
-    res.json(chat);
+    console.log('chat encontrado: ', get_chat);
+
+    if (!get_chat.length === 0) {
+      try {
+        const sql = `
+        INSERT INTO chat (id_cliente, id_trabajador, f_creacion, id_estado) 
+        VALUES (?, ?, NOW(), 1);`;
+        const chat = await select(sql, [
+          id_cliente,
+          id_trabajador,
+        ]);
+        console.log('chat creado: ', chat);
+        res.json(chat);
+        
+      } catch (error) {
+        console.error("Error al crear chat:", error);
+        res.status(500).json({ error: "Error al crear chat" });
+      }    
+    }
   } catch (err) {
     console.error("Error al crear chat:", err);
     res.status(500).json({ error: "Error al crear chat" });
@@ -85,6 +104,8 @@ const updateRespondido = async (req, res) => {
   const { id } = req.params;
   const { id_estado } = req.body;
 
+  console.log('id: ', id);
+  console.log('id_estado: ', id_estado);
   if (!id_estado) {
     return res.status(400).json({
       message: "El id_estado es requerido",
@@ -94,11 +115,25 @@ const updateRespondido = async (req, res) => {
   //Updatear chat si el id_estado es 4
   try {
     if (id_estado === 4) {
+
+      try {
+        const sql_chat = `
+        SELECT 	id_cliente,
+          id_trabajador
+        FROM cotizacion_usuario
+        WHERE id = ?;`;
+        const datos_chat = await select(sql_chat, [id]);
+        console.log('datos_chat: ', datos_chat);
+      } catch (err) {
+        console.error("Error al actualizar el chat:", err);
+        res.status(500).json({ error: "Error al obtener el chat" });
+      }
+      
       const sql = `
         UPDATE chat 
         SET id_estado = ?
-        WHERE id = ?`;
-      const resultado = await select(sql, [id_estado, id]);
+        WHERE id_cliente = ? AND id_trabajador = ?`;
+      const resultado = await select(sql, [id_estado, datos_chat.id_cliente, datos_chat.id_trabajador]);
 
       console.log('chat actualizado: ', resultado);
       res.json(resultado);
