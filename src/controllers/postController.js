@@ -13,6 +13,7 @@ const getPosts = async (req, res) => {
             pro.descripcion as "profesion",
             u.foto,
             u.id_auth,
+            u.id_estado,
             u.id as id_usuario -- agregado para el post de usuario
         FROM post p 
         JOIN usuario u ON u.id = p.id_usuario
@@ -39,7 +40,9 @@ const getPostByUser = async (req, res) => {
                 p.fecha_creacion,
                 u.nombre,
                 u.apellido,
-                u.foto
+                u.foto,
+                u.id_auth,
+                u.id_estado,
             FROM post p 
             JOIN usuario u ON u.id = p.id_usuario
             WHERE u.id = ? AND p.estado = 1
@@ -62,7 +65,10 @@ const getPostByCategory = async (req, res) => {
                 p.fecha_creacion,
                 u.nombre,
                 u.apellido,
-                u.foto
+                u.foto,
+                u.id_auth,
+                u.id_estado,
+               
         FROM post p
         JOIN usuario u ON u.id = p.id_usuario  
         JOIN profesion prof ON prof.id = u.id_profesion 
@@ -95,6 +101,7 @@ const getPostByPost = async (req, res) => {
                 pro.descripcion as "profesion",
                 u.foto,
                 u.id_auth,
+                u.id_estado,
                 u.id as id_usuario -- agregado para el post de usuario
             FROM post p 
             JOIN usuario u ON u.id = p.id_usuario

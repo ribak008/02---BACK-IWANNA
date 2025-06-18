@@ -29,7 +29,8 @@ const getCategoryTrabajadores = async (req, res) => {
         FROM usuario u
         JOIN profesion p on p.id = u.id_profesion
         JOIN area_profesion ap on ap.id = p.id_area
-        WHERE ap.id = ? ;`;
+        WHERE ap.id = ?
+        ORDER BY u.id_estado , u.id_auth ;`;
     const categorias = await select(sql_category, [id]);
     res.json(categorias);
   } catch (err) {
