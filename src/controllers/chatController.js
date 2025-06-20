@@ -13,6 +13,7 @@ const getChat = async (req, res) => {
 };
 
 const getChatsByIdTrabajador = async (req, res) => {
+    console.log('entro al chat con un id: ', req.params.id);
     const id = req.params.id;
     try {
         const sql = `
@@ -45,6 +46,7 @@ const getChatsByIdCliente = async (req, res) => {
     
    const sql = 
         `select 
+        ch.id,
         ch.id_trabajador,
         ch.id_estado,
         DATE_FORMAT(ch.f_creacion, '%d/%m/%Y') AS f_creacion,
@@ -67,12 +69,14 @@ const getChatsByIdCliente = async (req, res) => {
 //////////////////////////////////////////////////////////////
 
 const getMensajes = async (req, res) => {
+    console.log('entro al chat con un id: ', req.params.id);
     const id = req.params.id;
     try {
     
    const sql = 
-        `            SELECT  
-        mj.id,
+        `
+        SELECT  
+        mj.id,  
         mj.id_autor,
         mj.id_chat,
         mj.contenido,
@@ -86,7 +90,7 @@ const getMensajes = async (req, res) => {
         WHERE ch.id = ?
         order by mj.id;`;
         const chat = await select(sql, [id]);
-        //console.log(chat);
+        console.log(chat);
         if (chat.length === 0) {
             return res.status(404).json({ message: 'mensajes no encontrados' });
         }
