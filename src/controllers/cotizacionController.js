@@ -27,28 +27,21 @@ const createCotizacion = async (req, res) => {
     FROM chat
     WHERE id_cliente = ? AND id_trabajador = ?;
     `;
-    const get_chat = await select(sql_chat, [
-      id_cliente,
-      id_trabajador,
-    ]);
-    console.log('chat encontrado: ', get_chat);
+    const get_chat = await select(sql_chat, [id_cliente, id_trabajador]);
+    console.log("chat encontrado: ", get_chat);
 
     if (!get_chat.length === 0) {
       try {
         const sql = `
         INSERT INTO chat (id_cliente, id_trabajador, f_creacion, id_estado) 
         VALUES (?, ?, NOW(), 1);`;
-        const chat = await select(sql, [
-          id_cliente,
-          id_trabajador,
-        ]);
-        console.log('chat creado: ', chat);
+        const chat = await select(sql, [id_cliente, id_trabajador]);
+        console.log("chat creado: ", chat);
         res.json(chat);
-        
       } catch (error) {
         console.error("Error al crear chat:", error);
         res.status(500).json({ error: "Error al crear chat" });
-      }    
+      }
     }
   } catch (err) {
     console.error("Error al crear chat:", err);
@@ -104,8 +97,8 @@ const updateRespondido = async (req, res) => {
   const { id } = req.params;
   const { id_estado } = req.body;
 
-  console.log('id: ', id);
-  console.log('id_estado: ', id_estado);
+  console.log("id: ", id);
+  console.log("id_estado: ", id_estado);
   if (!id_estado) {
     return res.status(400).json({
       message: "El id_estado es requerido",
@@ -115,7 +108,6 @@ const updateRespondido = async (req, res) => {
   //Updatear chat si el id_estado es 4
   try {
     if (id_estado === 4) {
-
       try {
         const sql_chat = `
         SELECT 	id_cliente,
@@ -123,27 +115,29 @@ const updateRespondido = async (req, res) => {
         FROM cotizacion_usuario
         WHERE id = ?;`;
         const datos_chat = await select(sql_chat, [id]);
-        console.log('datos_chat: ', datos_chat);
+        console.log("datos_chat: ", datos_chat);
       } catch (err) {
         console.error("Error al actualizar el chat:", err);
         res.status(500).json({ error: "Error al obtener el chat" });
       }
-      
+
       const sql = `
         UPDATE chat 
         SET id_estado = ?
         WHERE id_cliente = ? AND id_trabajador = ?`;
-      const resultado = await select(sql, [id_estado, datos_chat.id_cliente, datos_chat.id_trabajador]);
+      const resultado = await select(sql, [
+        id_estado,
+        datos_chat.id_cliente,
+        datos_chat.id_trabajador,
+      ]);
 
-      console.log('chat actualizado: ', resultado);
+      console.log("chat actualizado: ", resultado);
       res.json(resultado);
     }
-
   } catch (err) {
     console.error("Error al actualizar el chat:", err);
     res.status(500).json({ error: "Error al actualizar el chat" });
   }
- 
 
   try {
     const sql = `
@@ -351,6 +345,31 @@ const getCotizacionesId = async (req, res) => {
   }
 };
 
+const getTrabajosTerminados = async (req, res) => {
+  const id = req.params.id;
+  try {
+    const sql = `
+      SELECT COUNT(id) as total_trabajos_terminados 
+      FROM cotizacion_usuario 
+      WHERE id_trabajador = ? AND id_estado = 5`;
+
+    const [respuesta] = await select(sql, [id]);
+
+    res.status(200).json({
+      id_trabajador: id,
+      total_trabajos_terminados: Number(
+        respuesta.total_trabajos_terminados || 0
+      ),
+      mensaje: "Conteo de trabajos terminados obtenido exitosamente",
+    });
+  } catch (err) {
+    console.error("Error al obtener conteo de trabajos terminados:", err);
+    res
+      .status(500)
+      .json({ error: "Error al obtener conteo de trabajos terminados" });
+  }
+};
+
 module.exports = {
   createCotizacion,
   getCotizaciones,
@@ -361,4 +380,5 @@ module.exports = {
   getCotizacionesCli,
   createRechazoCot,
   getRechazo,
+  getTrabajosTerminados,
 };

@@ -12,5 +12,6 @@ router.get("/id/:id", cotizacionController.getCotizacionesId);
 router.get("/rechazo/:id", cotizacionController.getRechazo);
 router.put("/responder/:id", cotizacionController.updateRespondido);
 router.get("/respuesta/:id", cotizacionController.getRespuestaId);
+router.get("/done/:id", cotizacionController.getTrabajosTerminados);
 
 module.exports = router;

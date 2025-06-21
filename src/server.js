@@ -12,6 +12,7 @@ const estadoRoutes = require("./routes/estadoRoutes");
 const perfilRoutes = require("./routes/perfilRoutes");
 const denunciaRoutes = require("./routes/denunciaRoutes");
 const comentarioRoutes = require("./routes/comentarioRoutes");
+const ratingRoutes = require("./routes/ratingRoutes");
 
 const app = express();
 
@@ -31,7 +32,7 @@ app.use("/s3", s3Routes);
 app.use("/perfil", perfilRoutes);
 app.use("/denuncia", denunciaRoutes);
 app.use("/comentario", comentarioRoutes);
-
+app.use("/rating", ratingRoutes);
 
 //INICIA LA API
 const PORT = process.env.PORT || 3000;
