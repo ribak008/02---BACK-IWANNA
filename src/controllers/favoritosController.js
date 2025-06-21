@@ -59,8 +59,8 @@ const getFavoritosTrabajador = async (req, res) => {
         JOIN profesion p on p.id = u.id_profesion 
         JOIN fav_trabajadores ft on ft.id_trabajador = u.id
         WHERE ft.id_estado = 2 AND ft.id_usuario = ?
-        ORDER BY ft.id DESC
-        ;
+        ORDER BY ft.id, u.id_estado , u.id_auth
+        ;    
         `;
         const favoritos = await select(sql, [id]);
         if (favoritos.length === 0) {

@@ -10,7 +10,7 @@ const { select } = require("../utils/consultas");
 const PostCheckoutSession = async (req, res) => {
     console.log('Creando sesión de pago con datos:', req.body);
     try {
-        const { priceId, customerId, userId } = req.body;
+        const { priceId, customerId, idUser: userId } = req.body;
 
         // Verificar que el cliente exista
         let customer;
@@ -56,35 +56,17 @@ const PostCheckoutSession = async (req, res) => {
                 price: priceId, 
                 quantity: 1
             }],
-    
             metadata: {
                 platform: 'react-native',
                 customer_id: customerId,
-                user_id: userId
+                user_id: userId.toString() // Ensure this is included
             }
-
         });
 
-        // Actualizar el estado del usuario
-        console.log('Actualizando estado del usuario:', userId);
-        try {
-            const sql = `UPDATE usuario SET id_estado = 2 WHERE id = ?`;
-            await select(sql, [userId]);
-            console.log('Estado del usuario actualizado exitosamente');
-            
-            res.json({ 
-                url: session.url,
-                sessionId: session.id
-            });
-        } catch (dbError) {
-            console.error('Error al actualizar el estado del usuario:', dbError);
-            // Aún así devolvemos la sesión ya que el pago se procesó correctamente
-            res.json({ 
-                url: session.url,
-                sessionId: session.id,
-                warning: 'El pago se procesó correctamente, pero hubo un error al actualizar el estado del usuario'
-            });
-        }
+        res.json({ 
+            url: session.url,
+            sessionId: session.id
+        });
 
     } catch (error) {
         console.error('Error al crear sesión de pago:', {
@@ -192,6 +174,7 @@ const getProducts = async (req, res) => {
 
 const getSuscriptionById = async (req, res) => {
     const appUserId = req.params.customerId;
+    console.log(appUserId.subscribed);
 
     try {
         // 1. Buscar el cliente por el app_user_id en los metadatos
@@ -270,9 +253,27 @@ const getSuscriptionById = async (req, res) => {
             billing_cycle_anchor: subscription.billing_cycle_anchor,
             billing_cycle_anchor_formatted: formatDate(subscription.billing_cycle_anchor),
             cancel_at_period_end: subscription.cancel_at_period_end,
-            message: 'Suscripción encontrada'
+            message: 'Suscripción encontrada',
+            
+            metadata: {
+                app_user_id: appUserId
+            }
         };
 
+        console.log('respuesta:',response);
+
+
+        if (!response.subscribed) {
+            console.log('Actualizando estado del usuario:', appUserId);
+            try {
+                const sql = `UPDATE usuario SET id_estado = 1 WHERE id = ?`;
+                await select(sql, [appUserId]);
+                console.log('Estado del usuario actualizado exitosamente');
+                
+            } catch (dbError) {
+                console.error('Error al actualizar el estado del usuario:', dbError);              
+            }
+        }
         res.json(response);
 
     } catch (error) {
@@ -296,30 +297,20 @@ const getPrices =  async (req, res) => {
 
 
 
-const webhook =async (req, res) => {
+const webhook = async (req, res) => {
     const sig = req.headers['stripe-signature'];
-    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
     let event;
+
     try {
-        event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+        event = stripe.webhooks.constructEvent(
+            req.body,
+            sig,
+            process.env.STRIPE_WEBHOOK_SECRET
+        );
     } catch (err) {
-        res.status(400).send(`Webhook Error: ${err.message}`);
-        return;
+        console.error(`Webhook Error: ${err.message}`);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
     }
-
-    // Manejar diferentes tipos de eventos
-    switch (event.type) {
-        case 'payment_intent.succeeded':
-        // Aquí puedes manejar el éxito del pago
-        break;
-        case 'payment_intent.payment_failed':
-        // Aquí puedes manejar el fallo del pago
-        break;
-        default:
-        console.log(`Evento no manejado: ${event.type}`);
-    }
-
     res.json({ received: true });
 };
 

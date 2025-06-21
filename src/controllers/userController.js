@@ -192,9 +192,26 @@ const updateUser = async (req, res) => {
   }
 };
 
+const updateSuscripcion = async (req, res) => {
+  console.log("Actualizando estado de la suscripción del usuario:", req.body);
+  const { userId } = req.body;
+  try {
+    const sql = `UPDATE usuario SET id_estado = 2 WHERE id = ?`;
+    const resultado = await select(sql, [userId]);
+    if (!resultado) {
+      return res.status(500).json({ exito: false });
+    }
+    res.json({ exito: true });
+  } catch (err) {
+    console.error("Error al actualizar usuario:", err);
+    res.status(500).json({ error: "Error al actualizar usuario" });
+  }
+};
+
 module.exports = {
   getUsuarioPorEmail,
   createUser,
   updateUser,
   getUsuarioIdDatos,
+  updateSuscripcion,
 };

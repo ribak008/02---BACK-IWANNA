@@ -14,38 +14,43 @@ const createCotizacion = async (req, res) => {
       descripcion,
       direccion,
     ]);
-    res.json(cotizacion);
-  } catch (err) {
-    console.error("Error al crear cotización:", err);
-    res.status(500).json({ error: "Error al crear cotización" });
-  }
 
-  //Crear datos en la tabla chat
-  try {
-    const sql_chat = `
+    //Crear datos en la tabla chat
+    try {
+      const sql_chat = `
     SELECT id
     FROM chat
     WHERE id_cliente = ? AND id_trabajador = ?;
     `;
-    const get_chat = await select(sql_chat, [id_cliente, id_trabajador]);
-    console.log("chat encontrado: ", get_chat);
+      const get_chat = await select(sql_chat, [id_cliente, id_trabajador]);
+      console.log("chat encontrado: ", get_chat);
 
-    if (!get_chat.length === 0) {
-      try {
-        const sql = `
+      if (get_chat.length == 0) {
+        console.log(
+          "no se encontro chat, insertando los datos: ",
+          id_cliente,
+          id_trabajador
+        );
+        try {
+          const sql = `
         INSERT INTO chat (id_cliente, id_trabajador, f_creacion, id_estado) 
         VALUES (?, ?, NOW(), 1);`;
-        const chat = await select(sql, [id_cliente, id_trabajador]);
-        console.log("chat creado: ", chat);
-        res.json(chat);
-      } catch (error) {
-        console.error("Error al crear chat:", error);
-        res.status(500).json({ error: "Error al crear chat" });
+          const chat = await select(sql, [id_cliente, id_trabajador]);
+          console.log("chat creado: ", chat);
+        } catch (error) {
+          console.error("Error al crear chat:", error);
+          res.status(500).json({ error: "Error al crear chat" });
+        }
       }
+    } catch (err) {
+      console.error("Error al crear chat:", err);
+      res.status(500).json({ error: "Error al crear chat" });
     }
+
+    res.json(cotizacion);
   } catch (err) {
-    console.error("Error al crear chat:", err);
-    res.status(500).json({ error: "Error al crear chat" });
+    console.error("Error al crear cotización:", err);
+    res.status(500).json({ error: "Error al crear cotización" });
   }
 };
 
@@ -99,68 +104,67 @@ const updateRespondido = async (req, res) => {
 
   console.log("id: ", id);
   console.log("id_estado: ", id_estado);
+
   if (!id_estado) {
     return res.status(400).json({
       message: "El id_estado es requerido",
     });
   }
 
-  //Updatear chat si el id_estado es 4
   try {
+    // Update chat status if id_estado is 4
     if (id_estado === 4) {
-      try {
-        const sql_chat = `
-        SELECT 	id_cliente,
-          id_trabajador
+      // Get chat data
+      const sql_chat = `
+        SELECT id_cliente, id_trabajador
         FROM cotizacion_usuario
-        WHERE id = ?;`;
-        const datos_chat = await select(sql_chat, [id]);
-        console.log("datos_chat: ", datos_chat);
-      } catch (err) {
-        console.error("Error al actualizar el chat:", err);
-        res.status(500).json({ error: "Error al obtener el chat" });
+        WHERE id = ?`;
+
+      const datos_chat = await select(sql_chat, [id]);
+
+      if (!datos_chat || datos_chat.length === 0) {
+        return res.status(404).json({ error: "Cotización no encontrada" });
       }
 
+      console.log("datos_chat: ", datos_chat[0]);
+
+      // Update chat status
       const sql = `
         UPDATE chat 
         SET id_estado = ?
         WHERE id_cliente = ? AND id_trabajador = ?`;
-      const resultado = await select(sql, [
+
+      await select(sql, [
         id_estado,
-        datos_chat.id_cliente,
-        datos_chat.id_trabajador,
+        datos_chat[0].id_cliente,
+        datos_chat[0].id_trabajador,
       ]);
-
-      console.log("chat actualizado: ", resultado);
-      res.json(resultado);
+      console.log("Chat actualizado correctamente");
     }
-  } catch (err) {
-    console.error("Error al actualizar el chat:", err);
-    res.status(500).json({ error: "Error al actualizar el chat" });
-  }
 
-  try {
-    const sql = `
+    // Update quote status
+    const sql_update = `
       UPDATE cotizacion_usuario 
       SET id_estado = ?
       WHERE id = ?`;
 
-    const resultado = await select(sql, [id_estado, id]);
-
-    if (resultado.affectedRows === 0) {
-      return res.status(404).json({
-        message: "No se encontró la cotización especificada",
-      });
-    }
+    const resultado = await select(sql_update, [id_estado, id]);
+    console.log("Cotización actualizada correctamente");
 
     res.json({
-      message: "Estado de cotización actualizado exitosamente",
-      cotizacionId: id,
-      nuevoEstado: id_estado,
+      success: true,
+      message: "Estado actualizado correctamente",
+      data: resultado,
     });
   } catch (err) {
-    console.error("Error al actualizar estado de cotización:", err);
-    res.status(500).json({ error: "Error al actualizar estado de cotización" });
+    console.error("Error al actualizar el estado:", err);
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        error: "Error al actualizar el estado",
+        details: err.message,
+      });
+    }
   }
 };
 
