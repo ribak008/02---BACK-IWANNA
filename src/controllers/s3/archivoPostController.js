@@ -1,4 +1,6 @@
 const { insert, select } = require('../../utils/consultas');
+const { contienePalabraProhibida} = require('../../utils/palabras_prohibidas');
+
 require("dotenv").config();
 const axios = require('axios');
 const ffmpeg = require('fluent-ffmpeg');
@@ -37,6 +39,11 @@ const postPublicacion = async (req, res) => {
             return res.status(400).json({ exito: false, error: "Faltan datos" });
         }
 
+        const tieneProhibida = await contienePalabraProhibida(descripcion);
+        if (tieneProhibida) {
+            return res.status(400).json({ exito: false, error: "La descripción contiene palabras no permitidas." });
+        }
+        
         // 1. Crear publicación en la base de datos
         const id_publicacion = await crearPublicacion(descripcion, id_user);
 
@@ -93,6 +100,8 @@ async function crearPublicacion(detalle, id_user) {
     const resultado = await insert(sql, [detalle, id_user]);
     return resultado.insertId;
 }
+
+
 
 module.exports = {
     postPublicacion
