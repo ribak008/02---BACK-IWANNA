@@ -41,9 +41,9 @@ const postPublicacion = async (req, res) => {
 
         const tieneProhibida = await contienePalabraProhibida(descripcion);
         if (tieneProhibida) {
-            return res.status(400).json({ exito: false, error: "La descripción contiene palabras no permitidas." });
+            return res.status(400).json({ exito: false, error: "Tu post no cumple con nuestras normas de comunidad" });
         }
-        
+
         // 1. Crear publicación en la base de datos
         const id_publicacion = await crearPublicacion(descripcion, id_user);
 

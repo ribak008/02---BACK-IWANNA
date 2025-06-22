@@ -1,5 +1,5 @@
 const { select, update } = require("../utils/consultas");
-
+const { contienePalabraProhibida} = require('../utils/palabras_prohibidas');
 const getComentarioByPost = async (req, res) => {
     const id = req.params.postId;
     try {
@@ -36,6 +36,10 @@ const crearComentario = async (req, res) => {
         return res.status(400).json({ error: "Faltan datos requeridos" });
     }
 
+    if (await contienePalabraProhibida(contenido)) {
+        return res.status(400).json({ error: "El comentario contiene palabras no permitidas" });
+    }
+
     try {
         const sql = `INSERT INTO comentario_post (post_id, usuario_id, contenido) VALUES (?, ?, ?)`;
         const result = await update(sql, [postId, usuario_id, contenido]);
@@ -51,16 +55,20 @@ const crearRespuestaComentario = async (req, res) => {
     const { usuario_id, contenido } = req.body;
 
     if (!usuario_id || !contenido) {
-        return res.status(400).json({ error: "Faltan datos requeridos" });
+        return res.status(400).json({exito: false, error: "Faltan datos requeridos" });
+    }
+    
+    if (await contienePalabraProhibida(contenido)) {
+        return res.status(400).json({ exito: false, error: "Tu comentario no cumple con nuestras normas de comunidad" });
     }
 
     try {
         const sql = `INSERT INTO respuesta_comentario (comentario_id, usuario_id, contenido) VALUES (?, ?, ?)`;
         const result = await update(sql, [comentarioId, usuario_id, contenido]);
-        res.status(201).json({ message: "Comentario creado", id: result.insertId });
+        res.status(201).json({exito: true, message: "Comentario creado", id: result.insertId });
     } catch (err) {
         console.error("Error al crear comentario:", err);
-        res.status(500).json({ error: "Error al crear comentario" });
+        res.status(500).json({exito: false, error: "Error al crear comentario" });
     }
 }; 
 
