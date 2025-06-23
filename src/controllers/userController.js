@@ -208,10 +208,47 @@ const updateSuscripcion = async (req, res) => {
   }
 };
 
+const verificacion = async (req, res) => {
+  const { userId } = req.body;
+
+  console.log("Verificando usuario:", userId);
+  
+  if (!userId) {
+    return res.status(400).json({ error: "User ID is required" });
+  }
+
+  try {
+    const insertSql = `INSERT INTO form_solicitud_verificado (id_trabajador, id_estado) VALUES (?, 3)`;
+    const insertResult = await select(insertSql, [userId]);
+    
+    if (!insertResult) {
+      return res.status(500).json({ exito: false, error: "Failed to create verification request" });
+    }
+
+    const updateSql = `UPDATE usuario SET id_auth = 3 WHERE id = ?`;
+    const updateResult = await select(updateSql, [userId]);
+    
+    if (!updateResult) {
+      return res.status(500).json({ exito: false, error: "Failed to update user status" });
+    }
+
+    res.json({ exito: true });
+    
+  } catch (error) {
+    console.error("Error in verificacion:", error);
+    res.status(500).json({ 
+      exito: false, 
+      error: "Internal server error",
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
 module.exports = {
   getUsuarioPorEmail,
   createUser,
   updateUser,
   getUsuarioIdDatos,
   updateSuscripcion,
+  verificacion,
 };

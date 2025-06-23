@@ -23,6 +23,8 @@ const getChatsByIdTrabajador = async (req, res) => {
                 ch.id_estado,
                 DATE_FORMAT(ch.f_creacion, '%d/%m/%Y') AS f_creacion,
                 u.nombre,
+                u.apellido,
+                u.foto,
                 u.id_profesion
             FROM chat ch
             JOIN usuario u ON u.id = ch.id_cliente
@@ -51,6 +53,8 @@ const getChatsByIdCliente = async (req, res) => {
         ch.id_estado,
         DATE_FORMAT(ch.f_creacion, '%d/%m/%Y') AS f_creacion,
         u.nombre,
+        u.apellido,
+        u.foto,
         u.id_profesion
         from chat ch
         join usuario u on u.id = ch.id_trabajador

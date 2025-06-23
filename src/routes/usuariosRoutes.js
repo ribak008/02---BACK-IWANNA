@@ -12,5 +12,6 @@ router.get("/:email", usuarioController.getUsuarioPorEmail);
 router.post("/create-user", usuarioController.createUser);
 router.put("/update-user/:id", usuarioController.updateUser);
 router.put("/update-suscripcion", usuarioController.updateSuscripcion);
+router.post("/verificacion", usuarioController.verificacion) 
 
 module.exports = router;
