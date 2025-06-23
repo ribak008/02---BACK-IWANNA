@@ -42,20 +42,23 @@ const getUsuarioIdDatos = async (req, res) => {
   const id = req.params.id;
   try {
     const sql = `
-      SELECT 
+    SELECT 
         u.id,
         u.email,
         u.direccion,
+        u.edad,
         u.descripcion as descripcion_usuario,
         pr.descripcion as profesion,
         eu.descripcion as estado_usuario,
         tu.descripcion as tipo_usuario,
+        s.descripcion as sexo ,
         u.fecha_creacion
       FROM usuario u 
-      JOIN profesion pr ON pr.id = u.id_profesion
+      LEFT JOIN profesion pr ON pr.id = u.id_profesion
       JOIN estado_usuario eu ON eu.id = u.id_estado
       JOIN tipo_usuario tu ON tu.id = u.id_tipo
-      WHERE u.id = ?
+      join sexo s on s.id = u.id_sexo
+      WHERE u.id = ?;
     `;
 
     const usuario = await select(sql, [id]);
