@@ -54,16 +54,17 @@ const getPostByUser = async (req, res) => {
 
 const contadorPostUser = async (req, res) => {
     const id_usuario = req.params.id_usuario;
-    const fecha_creacion = req.params.fecha_creacion;
 
-    console.log('Entro al contador', id_usuario, fecha_creacion);
+    const today = new Date().toISOString().split('T')[0];
+
+    console.log('Entro al contador', id_usuario, today);
     try {
         const sql_posts = `
         SELECT COUNT(*) as contador 
         FROM post 
         WHERE id_usuario = ? AND DATE(fecha_creacion) = ?;`;
         
-        const [result] = await select(sql_posts, [id_usuario, fecha_creacion]);
+        const [result] = await select(sql_posts, [id_usuario, today]);
         res.json({ contador: result.contador });
     } catch (err) {
         console.error("Error al consultar contador de posts:", err);
