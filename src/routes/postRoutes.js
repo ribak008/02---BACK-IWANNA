@@ -10,6 +10,7 @@ router.get('/usuario/:userId', postController.getPostByUser);
 router.get('/:postId', postController.getPostByPost);
 router.patch('/:postId', postController.patchPost);
 router.delete('/:postId', postController.deletePost);
+router.get('/contador/:id_usuario/:fecha_creacion', postController.contadorPostUser);
 
 
 module.exports = router;
