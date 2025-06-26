@@ -45,19 +45,20 @@ const getUsuarioIdDatos = async (req, res) => {
     SELECT 
         u.id,
         u.email,
-        u.direccion,
         u.edad,
         u.descripcion as descripcion_usuario,
         pr.descripcion as profesion,
         eu.descripcion as estado_usuario,
         tu.descripcion as tipo_usuario,
-        s.descripcion as sexo ,
-        u.fecha_creacion
+        s.descripcion as sexo,
+        u.fecha_creacion,
+        d.descripcion as "direccion"
       FROM usuario u 
       LEFT JOIN profesion pr ON pr.id = u.id_profesion
       JOIN estado_usuario eu ON eu.id = u.id_estado
       JOIN tipo_usuario tu ON tu.id = u.id_tipo
       join sexo s on s.id = u.id_sexo
+      LEFT JOIN direccion_usuario d ON d.id_usuario = u.id
       WHERE u.id = ?;
     `;
 
