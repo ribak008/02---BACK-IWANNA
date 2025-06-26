@@ -55,7 +55,7 @@ const getCategoryPosts = async (req, res) => {
   const id = req.params.id;
   try {
     const sql_category = `	
-    SELECT	
+   SELECT	
     p.id,
     p.detalle, 
     p.archivo,
@@ -63,6 +63,7 @@ const getCategoryPosts = async (req, res) => {
     ap.id AS id_area_profesion,
     ap.descripcion AS descripcion_area, 
     prof.id AS id_profesion,
+    prof.descripcion as profesion,
     u.id_estado,
     u.foto, 
     p.fecha_creacion,
@@ -73,7 +74,7 @@ FROM post p
 JOIN usuario u ON u.id = p.id_usuario  
 JOIN profesion prof ON prof.id = u.id_profesion 
 JOIN area_profesion ap ON ap.id = prof.id_area
-WHERE ap.id = ?
+WHERE ap.id = 3
 ORDER BY p.id DESC;`;
     const categorias = await select(sql_category, [id]);
     res.json(categorias);

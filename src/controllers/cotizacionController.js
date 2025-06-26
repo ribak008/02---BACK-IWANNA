@@ -112,8 +112,8 @@ const updateRespondido = async (req, res) => {
   }
 
   try {
-    // Update chat status if id_estado is 4
-    if (id_estado === 4) {
+    // activar el chat si id_estado es 4
+    console.log("activando el chat");
       // Get chat data
       const sql_chat = `
         SELECT id_cliente, id_trabajador
@@ -128,7 +128,8 @@ const updateRespondido = async (req, res) => {
 
       console.log("datos_chat: ", datos_chat[0]);
 
-      // Update chat status
+      if (id_estado === 4) {
+      // activar el chat
       const sql = `
         UPDATE chat 
         SET id_estado = ?
@@ -139,10 +140,25 @@ const updateRespondido = async (req, res) => {
         datos_chat[0].id_cliente,
         datos_chat[0].id_trabajador,
       ]);
-      console.log("Chat actualizado correctamente");
+      console.log("Chat activado correctamente");
     }
 
-    // Update quote status
+    if (id_estado === 5) {
+      // Desactivar el chat
+      const sql = `
+        UPDATE chat 
+        SET id_estado = ?
+        WHERE id_cliente = ? AND id_trabajador = ?`;
+
+      await select(sql, [
+        id_estado,
+        datos_chat[0].id_cliente,
+        datos_chat[0].id_trabajador,
+      ]);
+      console.log("Chat desactivado correctamente");
+    }
+
+    // activar la cotizacion
     const sql_update = `
       UPDATE cotizacion_usuario 
       SET id_estado = ?

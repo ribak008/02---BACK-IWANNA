@@ -72,7 +72,7 @@ const getChatsByIdCliente = async (req, res) => {
 //////////////////////////////////////////////////////////////
 
 const getMensajes = async (req, res) => {
-  console.log("entro al chat con un id: ", req.params.id);
+  //console.log("entro al chat con un id: ", req.params.id);
   const id = req.params.id;
   try {
     const sql = `
@@ -91,7 +91,7 @@ const getMensajes = async (req, res) => {
         WHERE ch.id = ?
         order by mj.id;`;
     const chat = await select(sql, [id]);
-    console.log(chat);
+    //console.log(chat);
     if (chat.length === 0) {
       return res.status(404).json({ message: "mensajes no encontrados" });
     }

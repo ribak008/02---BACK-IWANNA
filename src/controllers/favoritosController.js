@@ -7,7 +7,7 @@ const getFavoritosPost = async (req, res) => {
     const id = req.params.id;
     console.log(req.params);
     try {
-      const sql = `SELECT
+      const sql = `          SELECT
                   p.id,
                   p.detalle,
                   p.archivo,
@@ -19,10 +19,12 @@ const getFavoritosPost = async (req, res) => {
                   u.id_estado as id_estado_suscripcion,
                   u.id_tipo,
                   u.id_auth,
-                  fp.id_estado
+                  fp.id_estado,
+                  p2.descripcion as profesion
           
           FROM post p
           JOIN usuario u ON u.id = p.id_usuario  
+          JOIN profesion p2 ON u.id_profesion  = p2.id 
           JOIN fav_post fp ON fp.id_post = p.id
           WHERE fp.id_estado = 2 AND fp.id_usuario = ?
           ORDER BY fp.id DESC
@@ -53,7 +55,7 @@ const getFavoritosTrabajador = async (req, res) => {
         u.id_estado as id_estado_suscripcion,
         u.id_tipo,
         u.id_auth,
-        p.descripcion,
+        p.descripcion as profesion,
         ft.id_estado 
         FROM usuario u
         JOIN profesion p on p.id = u.id_profesion 
