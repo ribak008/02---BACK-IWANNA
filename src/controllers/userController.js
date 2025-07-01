@@ -93,16 +93,15 @@ const createUser = async (req, res) => {
     id_profesion,
     id_estado,
     id_tipo,
-    id_auth,
-    direccion,
+    id_auth
   } = req.body;
 
   try {
-    const sql = `INSERT INTO usuario (nombre, apellido, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo,id_auth,direccion) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,1,?)`;
+    const sql = `INSERT INTO usuario (nombre, apellido, email, telefono, rut, edad, id_sexo, descripcion, id_profesion, id_estado, id_tipo,id_auth) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,1)`;
 
     // Ejecutar la consulta
-    const result = await select(sql, [
+    const result = await insert(sql, [
       nombre,
       apellido,
       email,
@@ -115,7 +114,6 @@ const createUser = async (req, res) => {
       id_estado,
       id_tipo,
       id_auth,
-      direccion,
     ]);
 
     // Enviar respuesta con el ID insertado
