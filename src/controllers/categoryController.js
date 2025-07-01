@@ -74,7 +74,7 @@ FROM post p
 JOIN usuario u ON u.id = p.id_usuario  
 JOIN profesion prof ON prof.id = u.id_profesion 
 JOIN area_profesion ap ON ap.id = prof.id_area
-WHERE ap.id = 3
+WHERE ap.id = ? AND p.estado = 1
 ORDER BY p.id DESC;`;
     const categorias = await select(sql_category, [id]);
     res.json(categorias);

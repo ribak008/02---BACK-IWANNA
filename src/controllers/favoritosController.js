@@ -26,7 +26,7 @@ const getFavoritosPost = async (req, res) => {
           JOIN usuario u ON u.id = p.id_usuario  
           JOIN profesion p2 ON u.id_profesion  = p2.id 
           JOIN fav_post fp ON fp.id_post = p.id
-          WHERE fp.id_estado = 2 AND fp.id_usuario = ?
+          WHERE fp.id_estado = 2 AND fp.id_usuario = ? AND p.estado = 1
           ORDER BY fp.id DESC
           ;`;
       const post = await select(sql, [id]);
