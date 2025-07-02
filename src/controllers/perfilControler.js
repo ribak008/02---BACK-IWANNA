@@ -20,9 +20,10 @@ const getPerfil = async (req, res) => {
     u.id_tipo,
     u.foto,
     u.id_auth,
-    u.direccion,
+    d.descripcion as "direccion",
     u.fecha_creacion
 FROM usuario u
+LEFT JOIN direccion_usuario d ON d.id_usuario = u.id
 LEFT JOIN profesion pr ON u.id_profesion = pr.id
 LEFT JOIN sexo s ON u.id_sexo = s.id
 WHERE u.id = ?`;
