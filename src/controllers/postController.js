@@ -10,6 +10,7 @@ const getPosts = async (req, res) => {
             p.fecha_creacion,
             u.nombre,
             u.apellido,
+            u.id_estado as id_estado_suscripcion,
             pro.descripcion as "profesion",
             u.foto,
             u.id_auth,
@@ -39,6 +40,7 @@ const getPostByUser = async (req, res) => {
                 p.fecha_creacion,
                 u.nombre,
                 u.apellido,
+                u.id_estado as id_estado_suscripcion,
                 u.foto
             FROM post p 
             JOIN usuario u ON u.id = p.id_usuario
@@ -82,6 +84,7 @@ const getPostByCategory = async (req, res) => {
                 p.fecha_creacion,
                 u.nombre,
                 u.apellido,
+                u.id_estado as id_estado_suscripcion,
                 u.foto
         FROM post p
         JOIN usuario u ON u.id = p.id_usuario  
@@ -112,6 +115,7 @@ const getPostByPost = async (req, res) => {
                 p.fecha_creacion,
                 u.nombre,
                 u.apellido,
+                u.id_estado as id_estado_suscripcion,
                 pro.descripcion as "profesion",
                 u.foto,
                 u.id_auth,
