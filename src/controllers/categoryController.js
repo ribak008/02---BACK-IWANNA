@@ -64,7 +64,7 @@ const getCategoryPosts = async (req, res) => {
     ap.descripcion AS descripcion_area, 
     prof.id AS id_profesion,
     prof.descripcion as profesion,
-    u.id_estado,
+    u.id_estado as id_estado_suscripcion,
     u.foto, 
     p.fecha_creacion,
     u.id_auth,
