@@ -114,21 +114,21 @@ const updateRespondido = async (req, res) => {
   try {
     // activar el chat si id_estado es 4
     console.log("activando el chat");
-      // Get chat data
-      const sql_chat = `
+    // Get chat data
+    const sql_chat = `
         SELECT id_cliente, id_trabajador
         FROM cotizacion_usuario
         WHERE id = ?`;
 
-      const datos_chat = await select(sql_chat, [id]);
+    const datos_chat = await select(sql_chat, [id]);
 
-      if (!datos_chat || datos_chat.length === 0) {
-        return res.status(404).json({ error: "Cotización no encontrada" });
-      }
+    if (!datos_chat || datos_chat.length === 0) {
+      return res.status(404).json({ error: "Cotización no encontrada" });
+    }
 
-      console.log("datos_chat: ", datos_chat[0]);
+    console.log("datos_chat: ", datos_chat[0]);
 
-      if (id_estado === 4) {
+    if (id_estado === 4) {
       // activar el chat
       const sql = `
         UPDATE chat 
@@ -308,10 +308,11 @@ const getCotizacionesCli = async (req, res) => {
     u.telefono,
     u.rut,
     u.edad,
-    u.direccion AS direccion_cliente
+    d.descripcion AS direccion_cliente
 
 FROM cotizacion_usuario cu
 JOIN usuario u ON cu.id_cliente = u.id
+LEFT JOIN direccion_usuario d ON d.id_usuario = u.id
 WHERE cu.id_cliente = ?
 ORDER BY cu.f_creacion DESC;`;
 
