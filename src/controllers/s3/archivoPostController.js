@@ -4,12 +4,11 @@ const { contienePalabraProhibida} = require('../../utils/palabras_prohibidas');
 require("dotenv").config();
 const axios = require('axios');
 const ffmpeg = require('fluent-ffmpeg');
-const ffmpegPath = require('ffmpeg-static');
 const { tmpdir } = require('os');
 const path = require('path');
 const fs = require('fs');
 
-ffmpeg.setFfmpegPath(ffmpegPath);
+ffmpeg.setFfmpegPath('/usr/bin/ffmpeg');
 
 function convertirVideoAH264(inputBuffer, outputPath) {
     return new Promise((resolve, reject) => {
