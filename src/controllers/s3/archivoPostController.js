@@ -1,4 +1,4 @@
-const { insert, select } = require('../../utils/consultas');
+const { insert, select, deleteQuery} = require('../../utils/consultas');
 const { contienePalabraProhibida} = require('../../utils/palabras_prohibidas');
 
 require("dotenv").config();
@@ -31,6 +31,8 @@ function convertirVideoAH264(inputBuffer, outputPath) {
 }
 
 const postPublicacion = async (req, res) => {
+    let id_publicacion = null;
+
     try {
         const archivo = req.file;
         const { id_user, descripcion } = req.body;
@@ -44,15 +46,13 @@ const postPublicacion = async (req, res) => {
             return res.status(400).json({ exito: false, error: "Tu post no cumple con nuestras normas de comunidad" });
         }
 
-        // 1. Crear publicación en la base de datos
-        const id_publicacion = await crearPublicacion(descripcion, id_user);
 
-        // 2. Generar nombre y ruta del archivo
+        id_publicacion  = await crearPublicacion(descripcion, id_user);
+
         const extension = archivo.originalname.split('.').pop();
         const nombreArchivo = `${id_user}_${id_publicacion}_publicacion.${extension}`;
         const ruta = `publicaciones/${nombreArchivo}`;
 
-        // 3. Construir la URL pública en S3
         const bucket = process.env.NOMBRE_BUCKET;
         const region = process.env.AWS_REGION;
         const url = `https://${bucket}.s3.${region}.amazonaws.com/${ruta}`;
@@ -64,7 +64,6 @@ const postPublicacion = async (req, res) => {
             bufferFinal = await convertirVideoAH264(archivo.buffer, outputPath);
         }
 
-        // 4. Subir archivo a S3 público
         const response = await axios.put(url, bufferFinal, {
             headers: {
                 'Content-Type': archivo.mimetype,
@@ -77,13 +76,18 @@ const postPublicacion = async (req, res) => {
             return res.status(500).json({ exito: false, error: "Falló subida a S3" });
         }
 
-        // 5. Actualizar publicación con el nombre del archivo
         await actualizarPublicacion(nombreArchivo, id_publicacion);
 
-        // 6. Responder con URL pública
         return res.status(200).json({ exito: true, url });
 
     } catch (error) {
+        if (id_publicacion) {
+            try {
+                await eliminaPublicacion(id_publicacion);
+            } catch (err) {
+                console.error("Error al intentar eliminar publicación fallida:", err.message);
+            }
+        }
         console.error("Error al subir directo sin SDK:", error.response?.data || error.message);
         return res.status(500).json({ exito: false, error: "Error interno al subir archivo" });
     }
@@ -92,6 +96,16 @@ const postPublicacion = async (req, res) => {
 async function actualizarPublicacion(urlArchivo, id_archivo) {
     const sql = `UPDATE post SET archivo = ? WHERE id = ?`;
     const resultado = await select(sql, [urlArchivo, id_archivo]);
+    return resultado;
+}
+
+async function eliminaPublicacion(id_archivo) {
+    const sql = `DELETE 
+                FROM 
+                    post
+                WHERE 
+                    id = ?`;
+    const resultado = await deleteQuery(sql, [id_archivo]);
     return resultado;
 }
 
